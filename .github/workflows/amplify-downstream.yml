@@ -15,7 +15,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
         with:
-          repository: amplify/amplify-swift
+          repository: aws-amplify/amplify-swift
       - name: Install openssl
         run: apt-get update && apt-get install -y libssl-dev
       - uses: actions/setup-java@v1
