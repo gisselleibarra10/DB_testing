@@ -1,6 +1,9 @@
 name: AmplifyDownstream
 
 on:
+  push:
+    branches:
+      - jbe/amplify_downstream
   workflow_dispatch:
 
 jobs:
