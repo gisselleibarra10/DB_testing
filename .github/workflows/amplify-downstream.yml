@@ -24,4 +24,4 @@ jobs:
           cd Packages/aws-sdk-swift
           git checkout main
           cd ../..
-          swift package build
+          swift build
