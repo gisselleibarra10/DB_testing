@@ -14,9 +14,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: aws-amplify/amplify-swift
+          path: amplify-swift
       - name: Build Amplify with AWS SDK main branch
         run: |
           set -x
+          cd amplify-swift
           swift package resolve
           swift package edit aws-sdk-swift
           cd Packages/aws-sdk-swift
