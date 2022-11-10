@@ -1,0 +1,28 @@
+name: AmplifyDownstream
+
+on:
+  workflow_dispatch:
+
+jobs:
+  amplify-downstream:
+    runs-on: ubuntu-latest
+    container:
+      image: swift:5.7-jammy
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          repository: amplify/amplify-swift
+      - name: Install openssl
+        run: apt-get update && apt-get install -y libssl-dev
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '18'
+      - name: Build Amplify with AWS SDK main branch
+        run: |
+          swift package resolve
+          swift package edit aws-sdk-swift
+          cd Packages/aws-sdk-swift
+          git checkout main
+          cd ../..
+          swift package build
