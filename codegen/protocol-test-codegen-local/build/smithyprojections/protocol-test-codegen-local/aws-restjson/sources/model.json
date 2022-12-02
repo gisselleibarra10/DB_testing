@@ -1,0 +1,456 @@
+{
+    "smithy": "2.0",
+    "shapes": {
+        "aws.protocoltests.restjson#BooleanArray": {
+            "type": "list",
+            "member": {
+                "target": "smithy.api#Boolean"
+            }
+        },
+        "aws.protocoltests.restjson#Child": {
+            "type": "structure",
+            "members": {
+                "grandchildren": {
+                    "target": "aws.protocoltests.restjson#GrandchildArray"
+                }
+            }
+        },
+        "aws.protocoltests.restjson#ChildArray": {
+            "type": "list",
+            "member": {
+                "target": "aws.protocoltests.restjson#Child"
+            }
+        },
+        "aws.protocoltests.restjson#EnumPayload": {
+            "type": "operation",
+            "input": {
+                "target": "aws.protocoltests.restjson#EnumPayloadInput"
+            },
+            "output": {
+                "target": "aws.protocoltests.restjson#EnumPayloadInput"
+            },
+            "traits": {
+                "smithy.api#http": {
+                    "uri": "/EnumPayload",
+                    "method": "POST"
+                },
+                "smithy.test#httpRequestTests": [
+                    {
+                        "id": "EnumPayload",
+                        "uri": "/EnumPayload",
+                        "body": "enumvalue",
+                        "params": {
+                            "payload": "enumvalue"
+                        },
+                        "method": "POST",
+                        "protocol": "aws.protocols#restJson1"
+                    }
+                ]
+            }
+        },
+        "aws.protocoltests.restjson#EnumQuery": {
+            "type": "operation",
+            "input": {
+                "target": "aws.protocoltests.restjson#EnumQueryInput"
+            },
+            "output": {
+                "target": "smithy.api#Unit"
+            },
+            "traits": {
+                "smithy.api#http": {
+                    "uri": "/foo/{enum}",
+                    "method": "GET"
+                },
+                "smithy.test#httpRequestTests": [
+                    {
+                        "id": "EnumQueryRequest",
+                        "uri": "/foo/enumvalue",
+                        "params": {
+                            "enum": "enumvalue"
+                        },
+                        "method": "GET",
+                        "protocol": "aws.protocols#restJson1"
+                    }
+                ]
+            }
+        },
+        "aws.protocoltests.restjson#EnumQueryInput": {
+            "type": "structure",
+            "members": {
+                "enum": {
+                    "target": "aws.protocoltests.restjson#StringEnum",
+                    "traits": {
+                        "smithy.api#httpLabel": {},
+                        "smithy.api#required": {}
+                    }
+                }
+            }
+        },
+        "aws.protocoltests.restjson#GetWidget": {
+            "type": "operation",
+            "input": {
+                "target": "aws.protocoltests.restjson#WidgetInput"
+            },
+            "output": {
+                "target": "aws.protocoltests.restjson#WidgetOutput"
+            },
+            "errors": [
+                {
+                    "target": "aws.protocoltests.restjson#MyError"
+                }
+            ],
+            "traits": {
+                "smithy.api#http": {
+                    "uri": "/widget",
+                    "method": "POST"
+                },
+                "smithy.waiters#waitable": {
+                    "SuccessTrueMatcher": {
+                        "documentation": "Acceptor matches on successful request",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "success": true
+                                }
+                            }
+                        ]
+                    },
+                    "SuccessFalseMatcher": {
+                        "documentation": "Acceptor matches on unsuccessful request",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "success": false
+                                }
+                            }
+                        ]
+                    },
+                    "ErrorTypeMatcher": {
+                        "documentation": "Acceptor matches on receipt of specified error",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "errorType": "MyError"
+                                }
+                            }
+                        ]
+                    },
+                    "OutputStringPropertyMatcher": {
+                        "documentation": "Acceptor matches on output payload property",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "stringProperty",
+                                        "expected": "payload property contents",
+                                        "comparator": "stringEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "OutputStringArrayAllPropertyMatcher": {
+                        "documentation": "Acceptor matches on output payload property",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "stringArrayProperty",
+                                        "expected": "payload property contents",
+                                        "comparator": "allStringEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "OutputStringArrayAnyPropertyMatcher": {
+                        "documentation": "Acceptor matches on output payload property",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "stringArrayProperty",
+                                        "expected": "payload property contents",
+                                        "comparator": "anyStringEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "OutputBooleanPropertyMatcher": {
+                        "documentation": "Acceptor matches on output payload property",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "booleanProperty",
+                                        "expected": "false",
+                                        "comparator": "booleanEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "InputOutputPropertyMatcher": {
+                        "documentation": "Acceptor matches on input property equaling output property",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "inputOutput": {
+                                        "path": "input.stringProperty == output.stringProperty",
+                                        "expected": "true",
+                                        "comparator": "booleanEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "FlattenMatcher": {
+                        "documentation": "Matches when any grandchild has name 'expected name'",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "children[].grandchildren[].name",
+                                        "expected": "expected name",
+                                        "comparator": "anyStringEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "FlattenLengthMatcher": {
+                        "documentation": "Matches when there are 6 grandchildren total",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "length(children[].grandchildren[]) == `6`",
+                                        "expected": "true",
+                                        "comparator": "booleanEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "ProjectedLengthMatcher": {
+                        "documentation": "Matches when exactly one child has 3 grandchildren",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "length(children[?length(grandchildren) == `3`]) == `1`",
+                                        "expected": "true",
+                                        "comparator": "booleanEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "FilterMatcher": {
+                        "documentation": "Matches when exactly 3 grandchildren have numbers above 4",
+                        "acceptors": [
+                            {
+                                "state": "success",
+                                "matcher": {
+                                    "output": {
+                                        "path": "length((children[].grandchildren[])[?number > `4`]) == `3`",
+                                        "expected": "true",
+                                        "comparator": "booleanEquals"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "aws.protocoltests.restjson#Grandchild": {
+            "type": "structure",
+            "members": {
+                "name": {
+                    "target": "smithy.api#String"
+                },
+                "number": {
+                    "target": "smithy.api#Integer"
+                }
+            }
+        },
+        "aws.protocoltests.restjson#GrandchildArray": {
+            "type": "list",
+            "member": {
+                "target": "aws.protocoltests.restjson#Grandchild"
+            }
+        },
+        "aws.protocoltests.restjson#MyError": {
+            "type": "structure",
+            "members": {
+                "message": {
+                    "target": "smithy.api#String"
+                }
+            },
+            "traits": {
+                "smithy.api#error": "client"
+            }
+        },
+        "aws.protocoltests.restjson#PrimitiveInt": {
+            "type": "integer",
+            "traits": {
+                "smithy.api#default": 0
+            }
+        },
+        "aws.protocoltests.restjson#PrimitiveIntHeader": {
+            "type": "operation",
+            "input": {
+                "target": "smithy.api#Unit"
+            },
+            "output": {
+                "target": "aws.protocoltests.restjson#PrimitiveIntHeaderInput"
+            },
+            "traits": {
+                "smithy.api#http": {
+                    "uri": "/primitive",
+                    "method": "POST"
+                },
+                "smithy.test#httpResponseTests": [
+                    {
+                        "id": "DeserPrimitiveHeader",
+                        "protocol": "aws.protocols#restJson1",
+                        "code": 200,
+                        "headers": {
+                            "x-field": "123"
+                        },
+                        "params": {
+                            "field": 123
+                        }
+                    }
+                ]
+            }
+        },
+        "aws.protocoltests.restjson#PrimitiveIntHeaderInput": {
+            "type": "structure",
+            "members": {
+                "field": {
+                    "target": "aws.protocoltests.restjson#PrimitiveInt",
+                    "traits": {
+                        "smithy.api#default": 0,
+                        "smithy.api#httpHeader": "x-field",
+                        "smithy.api#required": {}
+                    }
+                }
+            }
+        },
+        "aws.protocoltests.restjson#RestJsonExtras": {
+            "type": "service",
+            "version": "2019-12-16",
+            "operations": [
+                {
+                    "target": "aws.protocoltests.restjson#EnumPayload"
+                },
+                {
+                    "target": "aws.protocoltests.restjson#EnumQuery"
+                },
+                {
+                    "target": "aws.protocoltests.restjson#PrimitiveIntHeader"
+                },
+                {
+                    "target": "aws.protocoltests.restjson#StringPayload"
+                }
+            ],
+            "traits": {
+                "aws.api#service": {
+                    "sdkId": "Rest Json Protocol"
+                },
+                "aws.protocols#restJson1": {},
+                "smithy.api#documentation": "A REST JSON service that sends JSON requests and responses."
+            }
+        },
+        "aws.protocoltests.restjson#StringArray": {
+            "type": "list",
+            "member": {
+                "target": "smithy.api#String"
+            }
+        },
+        "aws.protocoltests.restjson#StringPayload": {
+            "type": "operation",
+            "input": {
+                "target": "aws.protocoltests.restjson#StringPayloadInput"
+            },
+            "output": {
+                "target": "aws.protocoltests.restjson#StringPayloadInput"
+            },
+            "traits": {
+                "smithy.api#http": {
+                    "uri": "/StringPayload",
+                    "method": "POST"
+                },
+                "smithy.test#httpRequestTests": [
+                    {
+                        "id": "StringPayload",
+                        "uri": "/StringPayload",
+                        "body": "rawstring",
+                        "params": {
+                            "payload": "rawstring"
+                        },
+                        "method": "POST",
+                        "protocol": "aws.protocols#restJson1"
+                    }
+                ]
+            }
+        },
+        "aws.protocoltests.restjson#Waiters": {
+            "type": "service",
+            "version": "2022-11-30",
+            "operations": [
+                {
+                    "target": "aws.protocoltests.restjson#GetWidget"
+                }
+            ],
+            "traits": {
+                "aws.api#service": {
+                    "sdkId": "Waiters"
+                },
+                "aws.protocols#restJson1": {}
+            }
+        },
+        "aws.protocoltests.restjson#WidgetInput": {
+            "type": "structure",
+            "members": {
+                "stringProperty": {
+                    "target": "smithy.api#String"
+                }
+            }
+        },
+        "aws.protocoltests.restjson#WidgetOutput": {
+            "type": "structure",
+            "members": {
+                "stringProperty": {
+                    "target": "smithy.api#String"
+                },
+                "stringArrayProperty": {
+                    "target": "aws.protocoltests.restjson#StringArray"
+                },
+                "booleanProperty": {
+                    "target": "smithy.api#Boolean"
+                },
+                "booleanArrayProperty": {
+                    "target": "aws.protocoltests.restjson#BooleanArray"
+                },
+                "children": {
+                    "target": "aws.protocoltests.restjson#ChildArray"
+                }
+            }
+        }
+    }
+}
