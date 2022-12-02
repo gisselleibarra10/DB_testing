@@ -1,4 +1,4 @@
-// swift-tools-version:5.4.0
+// swift-tools-version:5.5
 
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -18,6 +18,10 @@ var package = Package(
         .macOS(.v10_15), .iOS(.v13)
     ],
     products: [
+    ],
+    dependencies: [
+        .package(path: "../../aws-sdk-swift"),
+        .package(url: "https://github.com/awslabs/smithy-swift", .branch("jbe/acceptors")),
     ],
     targets: [
     ]
@@ -93,19 +97,4 @@ func appendTstTarget(name: String, path: String, dependency: String) {
                                        dependencies:  dependencies,
                                        path: "\(path)/swift-codegen/\(name)")
     )
-}
-
-
-
-if let smithySwiftDir = ProcessInfo.processInfo.environment["SMITHY_SWIFT_CI_DIR"],
-   let sdkDir = ProcessInfo.processInfo.environment["AWS_SDK_SWIFT_CI_DIR"] {
-    package.dependencies += [
-        .package(path: smithySwiftDir),
-        .package(path: sdkDir),
-    ]
-} else {
-    package.dependencies += [
-        .package(path: "../../smithy-swift"),
-        .package(path: "../../aws-sdk-swift"),
-    ]
 }
