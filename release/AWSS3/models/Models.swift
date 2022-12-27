@@ -134,11 +134,15 @@ extension AbortMultipartUploadInputBody: Swift.Decodable {
 
 extension AbortMultipartUploadOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = AbortMultipartUploadOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? AbortMultipartUploadOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = AbortMultipartUploadOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -148,22 +152,6 @@ extension AbortMultipartUploadOutputError {
         case "NoSuchUpload" : self = .noSuchUpload(try NoSuchUpload(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension AbortMultipartUploadOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -2180,11 +2168,15 @@ extension CompleteMultipartUploadInputBody: Swift.Decodable {
 
 extension CompleteMultipartUploadOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = CompleteMultipartUploadOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? CompleteMultipartUploadOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = CompleteMultipartUploadOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -2193,22 +2185,6 @@ extension CompleteMultipartUploadOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension CompleteMultipartUploadOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -3022,11 +2998,15 @@ extension CopyObjectInputBody: Swift.Decodable {
 
 extension CopyObjectOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = CopyObjectOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? CopyObjectOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = CopyObjectOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -3036,22 +3016,6 @@ extension CopyObjectOutputError {
         case "ObjectNotInActiveTierError" : self = .objectNotInActiveTierError(try ObjectNotInActiveTierError(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension CopyObjectOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -3628,11 +3592,15 @@ extension CreateBucketInputBody: Swift.Decodable {
 
 extension CreateBucketOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = CreateBucketOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? CreateBucketOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = CreateBucketOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -3643,22 +3611,6 @@ extension CreateBucketOutputError {
         case "BucketAlreadyOwnedByYou" : self = .bucketAlreadyOwnedByYou(try BucketAlreadyOwnedByYou(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension CreateBucketOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -3949,11 +3901,15 @@ extension CreateMultipartUploadInputBody: Swift.Decodable {
 
 extension CreateMultipartUploadOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = CreateMultipartUploadOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? CreateMultipartUploadOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = CreateMultipartUploadOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -3962,22 +3918,6 @@ extension CreateMultipartUploadOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension CreateMultipartUploadOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -4369,11 +4309,15 @@ extension DeleteBucketAnalyticsConfigurationInputBody: Swift.Decodable {
 
 extension DeleteBucketAnalyticsConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketAnalyticsConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketAnalyticsConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketAnalyticsConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -4382,22 +4326,6 @@ extension DeleteBucketAnalyticsConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketAnalyticsConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -4469,11 +4397,15 @@ extension DeleteBucketCorsInputBody: Swift.Decodable {
 
 extension DeleteBucketCorsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketCorsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketCorsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketCorsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -4482,22 +4414,6 @@ extension DeleteBucketCorsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketCorsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -4569,11 +4485,15 @@ extension DeleteBucketEncryptionInputBody: Swift.Decodable {
 
 extension DeleteBucketEncryptionOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketEncryptionOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketEncryptionOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketEncryptionOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -4582,22 +4502,6 @@ extension DeleteBucketEncryptionOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketEncryptionOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -4708,11 +4612,15 @@ extension DeleteBucketIntelligentTieringConfigurationInputBody: Swift.Decodable 
 
 extension DeleteBucketIntelligentTieringConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketIntelligentTieringConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketIntelligentTieringConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketIntelligentTieringConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -4721,22 +4629,6 @@ extension DeleteBucketIntelligentTieringConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketIntelligentTieringConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -4819,11 +4711,15 @@ extension DeleteBucketInventoryConfigurationInputBody: Swift.Decodable {
 
 extension DeleteBucketInventoryConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketInventoryConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketInventoryConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketInventoryConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -4832,22 +4728,6 @@ extension DeleteBucketInventoryConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketInventoryConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -4919,11 +4799,15 @@ extension DeleteBucketLifecycleInputBody: Swift.Decodable {
 
 extension DeleteBucketLifecycleOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketLifecycleOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketLifecycleOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketLifecycleOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -4932,22 +4816,6 @@ extension DeleteBucketLifecycleOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketLifecycleOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5030,11 +4898,15 @@ extension DeleteBucketMetricsConfigurationInputBody: Swift.Decodable {
 
 extension DeleteBucketMetricsConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketMetricsConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketMetricsConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketMetricsConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5043,22 +4915,6 @@ extension DeleteBucketMetricsConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketMetricsConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5078,11 +4934,15 @@ public struct DeleteBucketMetricsConfigurationOutputResponse: Swift.Equatable {
 
 extension DeleteBucketOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5091,22 +4951,6 @@ extension DeleteBucketOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5178,11 +5022,15 @@ extension DeleteBucketOwnershipControlsInputBody: Swift.Decodable {
 
 extension DeleteBucketOwnershipControlsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketOwnershipControlsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketOwnershipControlsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketOwnershipControlsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5191,22 +5039,6 @@ extension DeleteBucketOwnershipControlsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketOwnershipControlsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5278,11 +5110,15 @@ extension DeleteBucketPolicyInputBody: Swift.Decodable {
 
 extension DeleteBucketPolicyOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketPolicyOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketPolicyOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketPolicyOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5291,22 +5127,6 @@ extension DeleteBucketPolicyOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketPolicyOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5378,11 +5198,15 @@ extension DeleteBucketReplicationInputBody: Swift.Decodable {
 
 extension DeleteBucketReplicationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketReplicationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketReplicationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketReplicationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5391,22 +5215,6 @@ extension DeleteBucketReplicationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketReplicationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5478,11 +5286,15 @@ extension DeleteBucketTaggingInputBody: Swift.Decodable {
 
 extension DeleteBucketTaggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketTaggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketTaggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketTaggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5491,22 +5303,6 @@ extension DeleteBucketTaggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketTaggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5578,11 +5374,15 @@ extension DeleteBucketWebsiteInputBody: Swift.Decodable {
 
 extension DeleteBucketWebsiteOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteBucketWebsiteOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteBucketWebsiteOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteBucketWebsiteOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5591,22 +5391,6 @@ extension DeleteBucketWebsiteOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteBucketWebsiteOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -5891,11 +5675,15 @@ extension DeleteObjectInputBody: Swift.Decodable {
 
 extension DeleteObjectOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteObjectOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteObjectOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteObjectOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -5904,22 +5692,6 @@ extension DeleteObjectOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteObjectOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -6037,11 +5809,15 @@ extension DeleteObjectTaggingInputBody: Swift.Decodable {
 
 extension DeleteObjectTaggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteObjectTaggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteObjectTaggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteObjectTaggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -6050,22 +5826,6 @@ extension DeleteObjectTaggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteObjectTaggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -6259,11 +6019,15 @@ extension DeleteObjectsInputBody: Swift.Decodable {
 
 extension DeleteObjectsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeleteObjectsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeleteObjectsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeleteObjectsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -6272,22 +6036,6 @@ extension DeleteObjectsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeleteObjectsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -6441,11 +6189,15 @@ extension DeletePublicAccessBlockInputBody: Swift.Decodable {
 
 extension DeletePublicAccessBlockOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = DeletePublicAccessBlockOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? DeletePublicAccessBlockOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = DeletePublicAccessBlockOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -6454,22 +6206,6 @@ extension DeletePublicAccessBlockOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension DeletePublicAccessBlockOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -8503,11 +8239,15 @@ extension GetBucketAccelerateConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketAccelerateConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketAccelerateConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketAccelerateConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketAccelerateConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -8516,22 +8256,6 @@ extension GetBucketAccelerateConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketAccelerateConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -8634,11 +8358,15 @@ extension GetBucketAclInputBody: Swift.Decodable {
 
 extension GetBucketAclOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketAclOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketAclOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketAclOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -8647,22 +8375,6 @@ extension GetBucketAclOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketAclOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -8804,11 +8516,15 @@ extension GetBucketAnalyticsConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketAnalyticsConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketAnalyticsConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketAnalyticsConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketAnalyticsConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -8817,22 +8533,6 @@ extension GetBucketAnalyticsConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketAnalyticsConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -8938,11 +8638,15 @@ extension GetBucketCorsInputBody: Swift.Decodable {
 
 extension GetBucketCorsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketCorsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketCorsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketCorsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -8951,22 +8655,6 @@ extension GetBucketCorsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketCorsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9085,11 +8773,15 @@ extension GetBucketEncryptionInputBody: Swift.Decodable {
 
 extension GetBucketEncryptionOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketEncryptionOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketEncryptionOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketEncryptionOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9098,22 +8790,6 @@ extension GetBucketEncryptionOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketEncryptionOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9217,11 +8893,15 @@ extension GetBucketIntelligentTieringConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketIntelligentTieringConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketIntelligentTieringConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketIntelligentTieringConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketIntelligentTieringConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9230,22 +8910,6 @@ extension GetBucketIntelligentTieringConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketIntelligentTieringConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9363,11 +9027,15 @@ extension GetBucketInventoryConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketInventoryConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketInventoryConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketInventoryConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketInventoryConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9376,22 +9044,6 @@ extension GetBucketInventoryConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketInventoryConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9497,11 +9149,15 @@ extension GetBucketLifecycleConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketLifecycleConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketLifecycleConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketLifecycleConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketLifecycleConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9510,22 +9166,6 @@ extension GetBucketLifecycleConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketLifecycleConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9644,11 +9284,15 @@ extension GetBucketLocationInputBody: Swift.Decodable {
 
 extension GetBucketLocationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketLocationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketLocationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketLocationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9657,22 +9301,6 @@ extension GetBucketLocationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketLocationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9775,11 +9403,15 @@ extension GetBucketLoggingInputBody: Swift.Decodable {
 
 extension GetBucketLoggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketLoggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketLoggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketLoggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9788,22 +9420,6 @@ extension GetBucketLoggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketLoggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -9918,11 +9534,15 @@ extension GetBucketMetricsConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketMetricsConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketMetricsConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketMetricsConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketMetricsConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -9931,22 +9551,6 @@ extension GetBucketMetricsConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketMetricsConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10052,11 +9656,15 @@ extension GetBucketNotificationConfigurationInputBody: Swift.Decodable {
 
 extension GetBucketNotificationConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketNotificationConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketNotificationConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketNotificationConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10065,22 +9673,6 @@ extension GetBucketNotificationConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketNotificationConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10262,11 +9854,15 @@ extension GetBucketOwnershipControlsInputBody: Swift.Decodable {
 
 extension GetBucketOwnershipControlsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketOwnershipControlsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketOwnershipControlsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketOwnershipControlsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10275,22 +9871,6 @@ extension GetBucketOwnershipControlsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketOwnershipControlsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10396,11 +9976,15 @@ extension GetBucketPolicyInputBody: Swift.Decodable {
 
 extension GetBucketPolicyOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketPolicyOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketPolicyOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketPolicyOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10409,22 +9993,6 @@ extension GetBucketPolicyOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketPolicyOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10529,11 +10097,15 @@ extension GetBucketPolicyStatusInputBody: Swift.Decodable {
 
 extension GetBucketPolicyStatusOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketPolicyStatusOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketPolicyStatusOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketPolicyStatusOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10542,22 +10114,6 @@ extension GetBucketPolicyStatusOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketPolicyStatusOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10663,11 +10219,15 @@ extension GetBucketReplicationInputBody: Swift.Decodable {
 
 extension GetBucketReplicationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketReplicationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketReplicationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketReplicationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10676,22 +10236,6 @@ extension GetBucketReplicationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketReplicationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10797,11 +10341,15 @@ extension GetBucketRequestPaymentInputBody: Swift.Decodable {
 
 extension GetBucketRequestPaymentOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketRequestPaymentOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketRequestPaymentOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketRequestPaymentOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10810,22 +10358,6 @@ extension GetBucketRequestPaymentOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketRequestPaymentOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -10928,11 +10460,15 @@ extension GetBucketTaggingInputBody: Swift.Decodable {
 
 extension GetBucketTaggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketTaggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketTaggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketTaggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -10941,22 +10477,6 @@ extension GetBucketTaggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketTaggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -11077,11 +10597,15 @@ extension GetBucketVersioningInputBody: Swift.Decodable {
 
 extension GetBucketVersioningOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketVersioningOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketVersioningOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketVersioningOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -11090,22 +10614,6 @@ extension GetBucketVersioningOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketVersioningOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -11218,11 +10726,15 @@ extension GetBucketWebsiteInputBody: Swift.Decodable {
 
 extension GetBucketWebsiteOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetBucketWebsiteOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetBucketWebsiteOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetBucketWebsiteOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -11231,22 +10743,6 @@ extension GetBucketWebsiteOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetBucketWebsiteOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -11419,11 +10915,15 @@ extension GetObjectAclInputBody: Swift.Decodable {
 
 extension GetObjectAclOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectAclOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectAclOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectAclOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -11433,22 +10933,6 @@ extension GetObjectAclOutputError {
         case "NoSuchKey" : self = .noSuchKey(try NoSuchKey(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectAclOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -11661,11 +11145,15 @@ extension GetObjectAttributesInputBody: Swift.Decodable {
 
 extension GetObjectAttributesOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectAttributesOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectAttributesOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectAttributesOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -11675,22 +11163,6 @@ extension GetObjectAttributesOutputError {
         case "NoSuchKey" : self = .noSuchKey(try NoSuchKey(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectAttributesOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -12396,11 +11868,15 @@ extension GetObjectLegalHoldInputBody: Swift.Decodable {
 
 extension GetObjectLegalHoldOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectLegalHoldOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectLegalHoldOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectLegalHoldOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -12409,22 +11885,6 @@ extension GetObjectLegalHoldOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectLegalHoldOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -12530,11 +11990,15 @@ extension GetObjectLockConfigurationInputBody: Swift.Decodable {
 
 extension GetObjectLockConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectLockConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectLockConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectLockConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -12543,22 +12007,6 @@ extension GetObjectLockConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectLockConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -12612,11 +12060,15 @@ extension GetObjectLockConfigurationOutputResponseBody: Swift.Decodable {
 
 extension GetObjectOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -12627,22 +12079,6 @@ extension GetObjectOutputError {
         case "NoSuchKey" : self = .noSuchKey(try NoSuchKey(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -13103,11 +12539,15 @@ extension GetObjectRetentionInputBody: Swift.Decodable {
 
 extension GetObjectRetentionOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectRetentionOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectRetentionOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectRetentionOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -13116,22 +12556,6 @@ extension GetObjectRetentionOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectRetentionOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -13260,11 +12684,15 @@ extension GetObjectTaggingInputBody: Swift.Decodable {
 
 extension GetObjectTaggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectTaggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectTaggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectTaggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -13273,22 +12701,6 @@ extension GetObjectTaggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectTaggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -13433,11 +12845,15 @@ extension GetObjectTorrentInputBody: Swift.Decodable {
 
 extension GetObjectTorrentOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetObjectTorrentOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetObjectTorrentOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetObjectTorrentOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -13446,22 +12862,6 @@ extension GetObjectTorrentOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetObjectTorrentOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -13579,11 +12979,15 @@ extension GetPublicAccessBlockInputBody: Swift.Decodable {
 
 extension GetPublicAccessBlockOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = GetPublicAccessBlockOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? GetPublicAccessBlockOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = GetPublicAccessBlockOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -13592,22 +12996,6 @@ extension GetPublicAccessBlockOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension GetPublicAccessBlockOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -13941,11 +13329,15 @@ extension HeadBucketInputBody: Swift.Decodable {
 
 extension HeadBucketOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = HeadBucketOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? HeadBucketOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = HeadBucketOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -13955,22 +13347,6 @@ extension HeadBucketOutputError {
         case "NotFound" : self = .notFound(try NotFound(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension HeadBucketOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -14153,11 +13529,15 @@ extension HeadObjectInputBody: Swift.Decodable {
 
 extension HeadObjectOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = HeadObjectOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? HeadObjectOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = HeadObjectOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -14167,22 +13547,6 @@ extension HeadObjectOutputError {
         case "NotFound" : self = .notFound(try NotFound(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension HeadObjectOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -16488,11 +15852,15 @@ extension ListBucketAnalyticsConfigurationsInputBody: Swift.Decodable {
 
 extension ListBucketAnalyticsConfigurationsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListBucketAnalyticsConfigurationsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListBucketAnalyticsConfigurationsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListBucketAnalyticsConfigurationsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -16501,22 +15869,6 @@ extension ListBucketAnalyticsConfigurationsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListBucketAnalyticsConfigurationsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -16660,11 +16012,15 @@ extension ListBucketIntelligentTieringConfigurationsInputBody: Swift.Decodable {
 
 extension ListBucketIntelligentTieringConfigurationsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListBucketIntelligentTieringConfigurationsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListBucketIntelligentTieringConfigurationsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListBucketIntelligentTieringConfigurationsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -16673,22 +16029,6 @@ extension ListBucketIntelligentTieringConfigurationsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListBucketIntelligentTieringConfigurationsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -16846,11 +16186,15 @@ extension ListBucketInventoryConfigurationsInputBody: Swift.Decodable {
 
 extension ListBucketInventoryConfigurationsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListBucketInventoryConfigurationsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListBucketInventoryConfigurationsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListBucketInventoryConfigurationsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -16859,22 +16203,6 @@ extension ListBucketInventoryConfigurationsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListBucketInventoryConfigurationsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -17032,11 +16360,15 @@ extension ListBucketMetricsConfigurationsInputBody: Swift.Decodable {
 
 extension ListBucketMetricsConfigurationsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListBucketMetricsConfigurationsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListBucketMetricsConfigurationsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListBucketMetricsConfigurationsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -17045,22 +16377,6 @@ extension ListBucketMetricsConfigurationsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListBucketMetricsConfigurationsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -17177,11 +16493,15 @@ extension ListBucketsInputBody: Swift.Decodable {
 
 extension ListBucketsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListBucketsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListBucketsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListBucketsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -17190,22 +16510,6 @@ extension ListBucketsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListBucketsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -17383,11 +16687,15 @@ extension ListMultipartUploadsInputBody: Swift.Decodable {
 
 extension ListMultipartUploadsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListMultipartUploadsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListMultipartUploadsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListMultipartUploadsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -17396,22 +16704,6 @@ extension ListMultipartUploadsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListMultipartUploadsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -17704,11 +16996,15 @@ extension ListObjectVersionsInputBody: Swift.Decodable {
 
 extension ListObjectVersionsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListObjectVersionsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListObjectVersionsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListObjectVersionsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -17717,22 +17013,6 @@ extension ListObjectVersionsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListObjectVersionsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -18049,11 +17329,15 @@ extension ListObjectsInputBody: Swift.Decodable {
 
 extension ListObjectsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListObjectsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListObjectsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListObjectsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -18063,22 +17347,6 @@ extension ListObjectsOutputError {
         case "NoSuchBucket" : self = .noSuchBucket(try NoSuchBucket(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListObjectsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -18367,11 +17635,15 @@ extension ListObjectsV2InputBody: Swift.Decodable {
 
 extension ListObjectsV2OutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListObjectsV2OutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListObjectsV2OutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListObjectsV2OutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -18381,22 +17653,6 @@ extension ListObjectsV2OutputError {
         case "NoSuchBucket" : self = .noSuchBucket(try NoSuchBucket(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListObjectsV2OutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -18710,11 +17966,15 @@ extension ListPartsInputBody: Swift.Decodable {
 
 extension ListPartsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = ListPartsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? ListPartsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = ListPartsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -18723,22 +17983,6 @@ extension ListPartsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension ListPartsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -22116,11 +21360,15 @@ extension PutBucketAccelerateConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketAccelerateConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketAccelerateConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketAccelerateConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketAccelerateConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -22129,22 +21377,6 @@ extension PutBucketAccelerateConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketAccelerateConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -22352,11 +21584,15 @@ extension PutBucketAclInputBody: Swift.Decodable {
 
 extension PutBucketAclOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketAclOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketAclOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketAclOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -22365,22 +21601,6 @@ extension PutBucketAclOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketAclOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -22544,11 +21764,15 @@ extension PutBucketAnalyticsConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketAnalyticsConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketAnalyticsConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketAnalyticsConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketAnalyticsConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -22557,22 +21781,6 @@ extension PutBucketAnalyticsConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketAnalyticsConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -22739,11 +21947,15 @@ extension PutBucketCorsInputBody: Swift.Decodable {
 
 extension PutBucketCorsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketCorsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketCorsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketCorsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -22752,22 +21964,6 @@ extension PutBucketCorsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketCorsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -22934,11 +22130,15 @@ extension PutBucketEncryptionInputBody: Swift.Decodable {
 
 extension PutBucketEncryptionOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketEncryptionOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketEncryptionOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketEncryptionOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -22947,22 +22147,6 @@ extension PutBucketEncryptionOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketEncryptionOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -23112,11 +22296,15 @@ extension PutBucketIntelligentTieringConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketIntelligentTieringConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketIntelligentTieringConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketIntelligentTieringConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketIntelligentTieringConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -23125,22 +22313,6 @@ extension PutBucketIntelligentTieringConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketIntelligentTieringConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -23304,11 +22476,15 @@ extension PutBucketInventoryConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketInventoryConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketInventoryConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketInventoryConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketInventoryConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -23317,22 +22493,6 @@ extension PutBucketInventoryConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketInventoryConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -23491,11 +22651,15 @@ extension PutBucketLifecycleConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketLifecycleConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketLifecycleConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketLifecycleConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketLifecycleConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -23504,22 +22668,6 @@ extension PutBucketLifecycleConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketLifecycleConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -23686,11 +22834,15 @@ extension PutBucketLoggingInputBody: Swift.Decodable {
 
 extension PutBucketLoggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketLoggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketLoggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketLoggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -23699,22 +22851,6 @@ extension PutBucketLoggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketLoggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -23878,11 +23014,15 @@ extension PutBucketMetricsConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketMetricsConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketMetricsConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketMetricsConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketMetricsConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -23891,22 +23031,6 @@ extension PutBucketMetricsConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketMetricsConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -24066,11 +23190,15 @@ extension PutBucketNotificationConfigurationInputBody: Swift.Decodable {
 
 extension PutBucketNotificationConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketNotificationConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketNotificationConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketNotificationConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -24079,22 +23207,6 @@ extension PutBucketNotificationConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketNotificationConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -24254,11 +23366,15 @@ extension PutBucketOwnershipControlsInputBody: Swift.Decodable {
 
 extension PutBucketOwnershipControlsOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketOwnershipControlsOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketOwnershipControlsOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketOwnershipControlsOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -24267,22 +23383,6 @@ extension PutBucketOwnershipControlsOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketOwnershipControlsOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -24443,11 +23543,15 @@ extension PutBucketPolicyInputBody: Swift.Decodable {
 
 extension PutBucketPolicyOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketPolicyOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketPolicyOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketPolicyOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -24456,22 +23560,6 @@ extension PutBucketPolicyOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketPolicyOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -24645,11 +23733,15 @@ extension PutBucketReplicationInputBody: Swift.Decodable {
 
 extension PutBucketReplicationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketReplicationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketReplicationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketReplicationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -24658,22 +23750,6 @@ extension PutBucketReplicationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketReplicationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -24840,11 +23916,15 @@ extension PutBucketRequestPaymentInputBody: Swift.Decodable {
 
 extension PutBucketRequestPaymentOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketRequestPaymentOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketRequestPaymentOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketRequestPaymentOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -24853,22 +23933,6 @@ extension PutBucketRequestPaymentOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketRequestPaymentOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -25035,11 +24099,15 @@ extension PutBucketTaggingInputBody: Swift.Decodable {
 
 extension PutBucketTaggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketTaggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketTaggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketTaggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -25048,22 +24116,6 @@ extension PutBucketTaggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketTaggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -25237,11 +24289,15 @@ extension PutBucketVersioningInputBody: Swift.Decodable {
 
 extension PutBucketVersioningOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketVersioningOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketVersioningOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketVersioningOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -25250,22 +24306,6 @@ extension PutBucketVersioningOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketVersioningOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -25432,11 +24472,15 @@ extension PutBucketWebsiteInputBody: Swift.Decodable {
 
 extension PutBucketWebsiteOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutBucketWebsiteOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutBucketWebsiteOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutBucketWebsiteOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -25445,22 +24489,6 @@ extension PutBucketWebsiteOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutBucketWebsiteOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -25691,11 +24719,15 @@ extension PutObjectAclInputBody: Swift.Decodable {
 
 extension PutObjectAclOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutObjectAclOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutObjectAclOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutObjectAclOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -25705,22 +24737,6 @@ extension PutObjectAclOutputError {
         case "NoSuchKey" : self = .noSuchKey(try NoSuchKey(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutObjectAclOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -26387,11 +25403,15 @@ extension PutObjectLegalHoldInputBody: Swift.Decodable {
 
 extension PutObjectLegalHoldOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutObjectLegalHoldOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutObjectLegalHoldOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutObjectLegalHoldOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -26400,22 +25420,6 @@ extension PutObjectLegalHoldOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutObjectLegalHoldOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -26607,11 +25611,15 @@ extension PutObjectLockConfigurationInputBody: Swift.Decodable {
 
 extension PutObjectLockConfigurationOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutObjectLockConfigurationOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutObjectLockConfigurationOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutObjectLockConfigurationOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -26620,22 +25628,6 @@ extension PutObjectLockConfigurationOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutObjectLockConfigurationOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -26667,11 +25659,15 @@ public struct PutObjectLockConfigurationOutputResponse: Swift.Equatable {
 
 extension PutObjectOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutObjectOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutObjectOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutObjectOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -26680,22 +25676,6 @@ extension PutObjectOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutObjectOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -27025,11 +26005,15 @@ extension PutObjectRetentionInputBody: Swift.Decodable {
 
 extension PutObjectRetentionOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutObjectRetentionOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutObjectRetentionOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutObjectRetentionOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -27038,22 +26022,6 @@ extension PutObjectRetentionOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutObjectRetentionOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -27255,11 +26223,15 @@ extension PutObjectTaggingInputBody: Swift.Decodable {
 
 extension PutObjectTaggingOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutObjectTaggingOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutObjectTaggingOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutObjectTaggingOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -27268,22 +26240,6 @@ extension PutObjectTaggingOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutObjectTaggingOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -27462,11 +26418,15 @@ extension PutPublicAccessBlockInputBody: Swift.Decodable {
 
 extension PutPublicAccessBlockOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = PutPublicAccessBlockOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? PutPublicAccessBlockOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = PutPublicAccessBlockOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -27475,22 +26435,6 @@ extension PutPublicAccessBlockOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension PutPublicAccessBlockOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -28868,11 +27812,15 @@ extension RestoreObjectInputBody: Swift.Decodable {
 
 extension RestoreObjectOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = RestoreObjectOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? RestoreObjectOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = RestoreObjectOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -28882,22 +27830,6 @@ extension RestoreObjectOutputError {
         case "ObjectAlreadyInActiveTierError" : self = .objectAlreadyInActiveTierError(try ObjectAlreadyInActiveTierError(httpResponse: httpResponse, decoder: decoder, message: message, requestID: requestID, requestID2: requestID2))
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension RestoreObjectOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -29792,11 +28724,15 @@ extension SelectObjectContentInputBody: Swift.Decodable {
 
 extension SelectObjectContentOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = SelectObjectContentOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? SelectObjectContentOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = SelectObjectContentOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -29805,22 +28741,6 @@ extension SelectObjectContentOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension SelectObjectContentOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -31456,11 +30376,15 @@ extension UploadPartCopyInputBody: Swift.Decodable {
 
 extension UploadPartCopyOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = UploadPartCopyOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? UploadPartCopyOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = UploadPartCopyOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -31469,22 +30393,6 @@ extension UploadPartCopyOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension UploadPartCopyOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -31890,11 +30798,15 @@ extension UploadPartInputBody: Swift.Decodable {
 
 extension UploadPartOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = UploadPartOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? UploadPartOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = UploadPartOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -31903,22 +30815,6 @@ extension UploadPartOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension UploadPartOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
@@ -32634,11 +31530,15 @@ extension WriteGetObjectResponseInputBody: Swift.Decodable {
 
 extension WriteGetObjectResponseOutputError: ClientRuntime.HttpResponseBinding {
     public init(httpResponse: ClientRuntime.HttpResponse, decoder: ClientRuntime.ResponseDecoder? = nil) throws {
-        let errorDetails = WriteGetObjectResponseOutputError.isNotFoundAndEmptyBody(httpResponse: httpResponse)
-            ? WriteGetObjectResponseOutputError.constructRestXMLError(httpResponse: httpResponse)
-            : try AWSClientRuntime.RestXMLError(httpResponse: httpResponse)
-        let requestID2 = WriteGetObjectResponseOutputError.getRequestId2(httpResponse: httpResponse)
-        try self.init(errorType: errorDetails.errorCode, httpResponse: httpResponse, decoder: decoder, message: errorDetails.message, requestID: errorDetails.requestId, requestID2: requestID2)
+        let restXMLError = try AWSClientRuntime.RestXMLError.makeError(from: httpResponse
+        try self.init(
+            errorType: restXMLError.errorCode,
+            httpResponse: httpResponse,
+            decoder: decoder,
+            message: restXMLError.message,
+            requestID: restXMLError.requestId,
+            requestID2: httpResponse.requestId2
+        )
     }
 }
 
@@ -32647,22 +31547,6 @@ extension WriteGetObjectResponseOutputError {
         switch errorType {
         default : self = .unknown(UnknownAWSHttpServiceError(httpResponse: httpResponse, message: message, requestID: requestID))
         }
-    }
-}
-extension WriteGetObjectResponseOutputError {
-    static func isNotFoundAndEmptyBody(httpResponse: HttpResponse) -> Bool {
-        if case .none = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        } else if case .empty = httpResponse.body {
-            return httpResponse.statusCode == .notFound
-        }
-        return false
-    }
-    static func constructRestXMLError(httpResponse: HttpResponse) -> AWSClientRuntime.RestXMLError {
-        return RestXMLError(errorCode: "NotFound", requestId: httpResponse.headers.value(for: "x-amz-request-id"))
-    }
-    static func getRequestId2(httpResponse: HttpResponse) -> String? {
-        return httpResponse.headers.value(for: "x-amz-id-2")
     }
 }
 
