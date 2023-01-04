@@ -2722,7 +2722,7 @@ extension SynthesizeSpeechInput: Swift.Encodable {
 }
 
 extension SynthesizeSpeechInput {
-    public func presignURL(config: PollyClientConfigurationProtocol, expiration: Swift.Int64) async throws -> ClientRuntime.URL? {
+    public func presignURL(config: PollyClientConfigurationProtocol, expiration: Foundation.TimeInterval) async throws -> ClientRuntime.URL? {
         let serviceName = "Polly"
         let input = self
         let encoder = ClientRuntime.JSONEncoder()

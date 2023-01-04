@@ -11979,7 +11979,7 @@ extension GetObjectInput: ClientRuntime.HeaderProvider {
 }
 
 extension GetObjectInput {
-    public func presignURL(config: S3ClientConfigurationProtocol, expiration: Swift.Int64) async throws -> ClientRuntime.URL? {
+    public func presignURL(config: S3ClientConfigurationProtocol, expiration: Foundation.TimeInterval) async throws -> ClientRuntime.URL? {
         let serviceName = "S3"
         let input = self
         let encoder = ClientRuntime.XMLEncoder()
@@ -25908,7 +25908,7 @@ extension PutObjectInput: ClientRuntime.HeaderProvider {
 }
 
 extension PutObjectInput {
-    public func presignURL(config: S3ClientConfigurationProtocol, expiration: Swift.Int64) async throws -> ClientRuntime.URL? {
+    public func presignURL(config: S3ClientConfigurationProtocol, expiration: Foundation.TimeInterval) async throws -> ClientRuntime.URL? {
         let serviceName = "S3"
         let input = self
         let encoder = ClientRuntime.XMLEncoder()
