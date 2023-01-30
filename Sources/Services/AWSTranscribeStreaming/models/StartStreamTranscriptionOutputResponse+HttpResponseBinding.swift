@@ -123,7 +123,9 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
             case .buffer(_):
                 fatalError()
             case .reader(let reader):
-                let messageDecoder = AWSMessageDecoder()
+                guard let messageDecoder = decoder?.messageDecoder else {
+                    fatalError()
+                }
                 let stream = AsyncThrowingStream<TranscribeStreamingClientTypes.TranscriptResultStream, Error> { continuation in
                     Task {
                         while !reader.hasFinishedWriting {

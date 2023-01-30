@@ -326,8 +326,6 @@ extension TranscribeStreamingClient: TranscribeStreamingClientProtocol {
                       .withRegion(value: config.region)
                       .withSigningName(value: "transcribe")
                       .withSigningRegion(value: config.signingRegion)
-                      .withMessageEncoder(value: AWSMessageEncoder())
-                      .withMessageDecoder(value: AWSMessageDecoder())
                       .withMessageSigner(value: AWSMessageSigner())
         var operation = ClientRuntime.OperationStack<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>(id: "startStreamTranscription")
         operation.initializeStep.intercept(position: .after, middleware: ClientRuntime.URLPathMiddleware<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>())

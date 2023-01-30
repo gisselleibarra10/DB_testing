@@ -17,7 +17,9 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
     {
         do {
             let encoder = context.getEncoder()
-            let messageEncoder = context.getMessageEncoder()
+            guard let messageEncoder = encoder.messageEncoder else {
+                fatalError()
+            }
             let messageSigner = context.getMessageSigner()
 
             if let audioStream = input.operationInput.audioStream {
