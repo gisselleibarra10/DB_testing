@@ -313,6 +313,7 @@ extension TranscribeStreamingClient: TranscribeStreamingClientProtocol {
     /// For more information on streaming with Amazon Transcribe, see [Transcribing streaming audio](https://docs.aws.amazon.com/transcribe/latest/dg/streaming.html).
     public func startStreamTranscription(input: StartStreamTranscriptionInput) async throws -> StartStreamTranscriptionOutputResponse
     {
+//        let signingConfig = AWSClientRuntime.AWSSigningConfig(signedBodyValue: .streamingSha256Events, flags: .init(useDoubleURIEncode: false, shouldNormalizeURIPath: true, omitSessionToken: true), date: .init(), service: "transcribe", region: config.region!, signatureType: .requestEvent, signingAlgorithm: .sigv4)
         let context = ClientRuntime.HttpContextBuilder()
                       .withEncoder(value: encoder)
                       .withDecoder(value: decoder)
@@ -326,7 +327,7 @@ extension TranscribeStreamingClient: TranscribeStreamingClientProtocol {
                       .withRegion(value: config.region)
                       .withSigningName(value: "transcribe")
                       .withSigningRegion(value: config.signingRegion)
-                      .withMessageSigner(value: AWSMessageSigner())
+//                      .withMessageSigner(value: AWSMessageSigner(signingConfig: signingConfig))
         var operation = ClientRuntime.OperationStack<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>(id: "startStreamTranscription")
         operation.initializeStep.intercept(position: .after, middleware: ClientRuntime.URLPathMiddleware<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>())
         operation.initializeStep.intercept(position: .after, middleware: ClientRuntime.URLHostMiddleware<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse>())
@@ -342,7 +343,7 @@ extension TranscribeStreamingClient: TranscribeStreamingClientProtocol {
         operation.serializeStep.intercept(position: .after, middleware: StartStreamTranscriptionInputBodyMiddleware())
         operation.finalizeStep.intercept(position: .before, middleware: ClientRuntime.ContentLengthMiddleware())
         operation.finalizeStep.intercept(position: .after, middleware: ClientRuntime.RetryerMiddleware<StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>(retryer: config.retryer))
-        let sigv4Config = AWSClientRuntime.SigV4Config(unsignedBody: false, signingAlgorithm: .sigv4)
+        let sigv4Config = AWSClientRuntime.SigV4Config(unsignedBody: true, signingAlgorithm: .sigv4)
         operation.finalizeStep.intercept(position: .before, middleware: AWSClientRuntime.SigV4Middleware<StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>(config: sigv4Config))
         operation.deserializeStep.intercept(position: .before, middleware: ClientRuntime.LoggerMiddleware<StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>(clientLogMode: config.clientLogMode))
         operation.deserializeStep.intercept(position: .after, middleware: ClientRuntime.DeserializeMiddleware<StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>())

@@ -9,7 +9,15 @@ import ClientRuntime
 import AwsCommonRuntimeKit
 
 public struct AWSMessageSigner: MessageSigner {
-    public init() {}
+    public func sign(message: ClientRuntime.SignableMessage, previousSignature: String) async throws -> String {
+fatalError()
+    }
+
+    let signingConfig: AWSSigningConfig
+    
+    public init(signingConfig: AWSSigningConfig) {
+        self.signingConfig = signingConfig
+    }
 
     public func signEmpty() throws -> ClientRuntime.Message {
         fatalError()

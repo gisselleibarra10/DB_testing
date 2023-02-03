@@ -14,7 +14,7 @@ public struct AWSSigningConfig {
     public let signedBodyHeader: AWSSignedBodyHeader
     public let signedBodyValue: AWSSignedBodyValue
     public let flags: SigningFlags
-    public let date: Date
+    public var date: Date
     public let service: String
     public let region: String
     public let shouldSignHeader: ((String) -> Bool)?
@@ -51,7 +51,7 @@ public struct AWSSigningConfig {
 }
 
 extension AWSSigningConfig {
-    func toCRTType() throws -> SigningConfig {
+    public func toCRTType() throws -> SigningConfig {
         SigningConfig(
             algorithm: signingAlgorithm.toCRTType(),
             signatureType: signatureType.toCRTType(),

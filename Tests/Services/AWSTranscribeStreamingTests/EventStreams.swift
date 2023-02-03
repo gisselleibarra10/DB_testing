@@ -9,8 +9,18 @@ import XCTest
 @testable import AWSTranscribeStreaming
 import ClientRuntime
 import AWSClientRuntime
+import AwsCommonRuntimeKit
 
 final class EventStreams: XCTestCase {
+    
+    internal let allocator = TracingAllocator(tracingStacksOf: defaultAllocator)
+    let logging = Logger(pipe: stdout, level: .trace, allocator: defaultAllocator)
+
+    override func setUp() {
+        super.setUp()
+
+        CommonRuntimeKit.initialize(allocator: self.allocator)
+    }
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -32,6 +42,7 @@ final class EventStreams: XCTestCase {
 //            XCTFail("Could not find file")
 //            return
 //        }
+        SDKLoggingSystem.initialize(logLevel: .debug)
 
         let path = "/Users/jangirg/Projects/Amplify/SwiftSDK/aws-sdk-swift/Tests/Services/AWSTranscribeStreamingTests/Resources/hello-kotlin-8000.wav"
 
@@ -43,6 +54,7 @@ final class EventStreams: XCTestCase {
         let framesPerChunk: UInt = 4096
         let stream = AsyncThrowingStream<TranscribeStreamingClientTypes.AudioStream, Error> { continuation in
             Task {
+//                try await Task.sleep(nanoseconds: 1_000_000_000_000)
                 while true {
                     let chunk = fileStream.read(maxBytes: framesPerChunk).getData()
                     if chunk.count == 0 {
@@ -56,7 +68,8 @@ final class EventStreams: XCTestCase {
         let audioStream = AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>(stream)
         let input = StartStreamTranscriptionInput(audioStream: audioStream,
                                                   languageCode: TranscribeStreamingClientTypes.LanguageCode.enUs,
-                                                  mediaEncoding: TranscribeStreamingClientTypes.MediaEncoding.pcm)
+                                                  mediaEncoding: TranscribeStreamingClientTypes.MediaEncoding.pcm,
+                                                  mediaSampleRateHertz: 8000)
         let output = try await client.startStreamTranscription(input: input)
         var fullMessage = ""
         for try await event in output.transcriptResultStream! {

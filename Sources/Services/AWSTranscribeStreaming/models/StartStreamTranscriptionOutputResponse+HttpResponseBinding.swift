@@ -141,6 +141,8 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
                 }
                 self.transcriptResultStream = AsyncResponseStream(stream)
             }
+        case .channel(_):
+            fatalError()
         case .none:
             fatalError()
         }

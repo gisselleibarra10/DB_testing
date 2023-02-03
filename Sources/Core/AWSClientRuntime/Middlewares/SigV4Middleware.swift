@@ -76,7 +76,18 @@ public struct SigV4Middleware<OperationStackOutput: HttpResponseBinding,
             config: signingConfig.toCRTType()
         )
         let sdkSignedRequest = input.update(from: crtSignedRequest, originalRequest: originalRequest)
+        
+        let authHeader = crtSignedRequest.getHeaderValue(name: "Authorization")
+        // get Signature={Value}
+        guard let signatureSequence = authHeader?.split(separator: "=").last else {
+            fatalError()
+        }
+        
+        let signature = String(signatureSequence)
+        
+        var updatedContext = context
+        HttpContext.signature = signature
 
-        return try await next.handle(context: context, input: sdkSignedRequest)
+        return try await next.handle(context: updatedContext, input: sdkSignedRequest)
     }
 }
