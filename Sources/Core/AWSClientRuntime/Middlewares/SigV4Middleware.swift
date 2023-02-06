@@ -55,7 +55,7 @@ public struct SigV4Middleware<OperationStackOutput: HttpResponseBinding,
         let flags = SigningFlags(useDoubleURIEncode: config.useDoubleURIEncode,
                                  shouldNormalizeURIPath: config.shouldNormalizeURIPath,
                                  omitSessionToken: config.omitSessionToken)
-        let signedBodyValue: AWSSignedBodyValue = config.unsignedBody ? .unsignedPayload : .empty
+        let signedBodyValue: AWSSignedBodyValue = .emptySha256
 
         let credentials = try await credentialsProvider.getCredentials()
         let signingConfig = AWSSigningConfig(

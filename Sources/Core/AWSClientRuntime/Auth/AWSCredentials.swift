@@ -28,7 +28,7 @@ public struct AWSCredentials {
 }
 
 extension AWSCredentials {
-    func toCRTType() throws -> Credentials {
+    public func toCRTType() throws -> Credentials {
         return try Credentials(
             accessKey: accessKey,
             secret: secret,

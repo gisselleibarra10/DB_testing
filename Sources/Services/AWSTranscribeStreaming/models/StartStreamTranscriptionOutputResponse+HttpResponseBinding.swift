@@ -128,7 +128,7 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
                 }
                 let stream = AsyncThrowingStream<TranscribeStreamingClientTypes.TranscriptResultStream, Error> { continuation in
                     Task {
-                        while !reader.hasFinishedWriting {
+                        while true {
                             let messageBuffer = AWSMessageDecoder.readMessage(streamReader: reader)
                             let message = try await messageDecoder.decode(data: messageBuffer)
                             guard let decoder = decoder else {
@@ -150,7 +150,7 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
 }
 
 extension TranscribeStreamingClientTypes.TranscriptResultStream: MessageUnmarshaller {
-    public init(message: ClientRuntime.Message, decoder: ResponseDecoder) throws {
+    public init(message: EventStreams.Message, decoder: ResponseDecoder) throws {
         switch message.type {
         case .event(let params):
             switch params.eventType {

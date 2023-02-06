@@ -18,19 +18,19 @@ extension HttpContext {
         return attributes.get(key: HttpContext.credentialsProvider)
     }
 
-    func getRegion() -> String? {
+    public func getRegion() -> String? {
         return attributes.get(key: HttpContext.region)
     }
 
-    func getSigningName() -> String? {
+    public func getSigningName() -> String? {
         return attributes.get(key: HttpContext.signingName)
     }
 
-    func getSigningRegion() -> String? {
+    public func getSigningRegion() -> String? {
         return attributes.get(key: HttpContext.signingRegion)
     }
 
-    func getSigningAlgorithm() -> AWSSigningAlgorithm? {
+    public func getSigningAlgorithm() -> AWSSigningAlgorithm? {
         guard let algorithmRawValue = attributes.get(key: HttpContext.signingAlgorithm) else {
             return nil
         }

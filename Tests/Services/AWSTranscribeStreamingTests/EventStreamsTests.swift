@@ -10,6 +10,40 @@ import XCTest
 import ClientRuntime
 import AWSClientRuntime
 import AwsCommonRuntimeKit
+import AVFoundation
+
+extension AudioBuffer {
+    func array() -> [Float] {
+        return Array(UnsafeBufferPointer(self))
+    }
+}
+
+extension AVAudioPCMBuffer {
+    func array() -> [Float] {
+        return self.audioBufferList.pointee.mBuffers.array()
+    }
+}
+
+extension Array where Element: FloatingPoint {
+    mutating func buffer() -> AudioBuffer {
+        return AudioBuffer(mNumberChannels: 1, mDataByteSize: UInt32(self.count * MemoryLayout<Element>.size), mData: &self)
+    }
+}
+
+extension Data {
+    public func toString() -> String {
+        return self.map { "\($0) " }.joined()
+    }
+}
+
+extension AVAudioPCMBuffer {
+    func toData() -> Data {
+        let channelCount = 1  // given PCMBuffer channel count is 1
+        let channels = UnsafeBufferPointer(start: self.floatChannelData, count: channelCount)
+        let ch0Data = NSData(bytes: channels[0], length:Int(self.frameCapacity * self.format.streamDescription.pointee.mBytesPerFrame))
+        return ch0Data as Data
+    }
+}
 
 final class EventStreams: XCTestCase {
     
@@ -31,38 +65,36 @@ final class EventStreams: XCTestCase {
     }
 
     func testExample() async throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-
-//        let client = try TranscribeStreamingClient(region: "us-west-2")/
-//        guard let path = Bundle.module.url(forResource: "hello-kotlin-8000", withExtension: ".wav") else {
-//            XCTFail("Could not find file")
-//            return
-//        }
         SDKLoggingSystem.initialize(logLevel: .debug)
 
-        let path = "/Users/jangirg/Projects/Amplify/SwiftSDK/aws-sdk-swift/Tests/Services/AWSTranscribeStreamingTests/Resources/hello-kotlin-8000.wav"
+        let audioPath = "/Users/jangirg/Projects/Amplify/SwiftSDK/aws-sdk-swift/Tests/Services/AWSTranscribeStreamingTests/Resources/hello-kotlin-8000.wav"
+        let audioURL = URL(fileURLWithPath: audioPath)
+        let audioData = try Data(contentsOf: audioURL)
 
-        let audio = FileManager.default.contents(atPath: path)!
-        let fileStream = DataStreamReader()
-        fileStream.write(buffer: .init(data: audio))
+        let framesPerChunk: UInt32 = 4096
 
         let client = try TranscribeStreamingClient(region: "us-west-2")
-        let framesPerChunk: UInt = 4096
+
         let stream = AsyncThrowingStream<TranscribeStreamingClientTypes.AudioStream, Error> { continuation in
             Task {
-//                try await Task.sleep(nanoseconds: 1_000_000_000_000)
-                while true {
-                    let chunk = fileStream.read(maxBytes: framesPerChunk).getData()
-                    if chunk.count == 0 {
-                        break
-                    }
-                    let audioEvent =  TranscribeStreamingClientTypes.AudioStream.audioevent(.init(audioChunk: chunk))
+                let chunkSize = 4096
+                let audioDataSize = audioData.count
+                
+                var currentStart = 0
+                var currentEnd = min(chunkSize, audioDataSize - currentStart)
+
+                while currentStart < audioDataSize {
+                    let dataChunk = audioData[currentStart ..< currentEnd]
+
+                    currentStart = currentEnd
+                    currentEnd = min(currentStart + chunkSize, audioDataSize)
+                    print(dataChunk.toString())
+                    let audioEvent =  TranscribeStreamingClientTypes.AudioStream.audioevent(.init(audioChunk: dataChunk))
+//                    print("emitting audioEvent")
                     continuation.yield(audioEvent)
                 }
+
+                continuation.finish()
             }
         }
         let audioStream = AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>(stream)

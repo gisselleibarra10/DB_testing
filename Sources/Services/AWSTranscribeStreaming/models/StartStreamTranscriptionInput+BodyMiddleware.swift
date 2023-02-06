@@ -3,6 +3,7 @@
 import ClientRuntime
 import AwsCommonRuntimeKit
 import AWSClientRuntime
+import Foundation.NSISO8601DateFormatter
 
 
 public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middleware {
@@ -20,12 +21,15 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
     {
         do {
             let encoder = context.getEncoder()
+            guard let region = context.getRegion(), let signingRegion = context.getSigningRegion(), let signingName = context.getSigningName() else {
+                fatalError()
+            }
             guard let messageEncoder = encoder.messageEncoder else {
                 fatalError()
             }
 //            let messageSigner = context.getMessageSigner()
             
-            
+            let signatureCalculator = DefaultSignatureCalculator(sha256Provider: Sha256HashFunction())
 
             if let audioStream = input.operationInput.audioStream {
 //                let messages: AsyncThrowingMapSequence<AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>, Data> = audioStream.map { stream -> Data in
@@ -35,30 +39,95 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
 //                    return encodedMessage
 //                }
                 
-                let messages: AsyncThrowingMapSequence<AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>, Data> = audioStream.map { event in
-                    let requestSignature = HttpContext.signature
-                    
-                    guard let credentialsProvider = context.getCredentialsProvider() else {
-                       fatalError()
-                    }
-                    
-                    var previousMessageSignature: String? = nil
-                    var message = try event.marshall(encoder: encoder)
-                    let now = Date()
-                    let signingConfig = await AWSSigningConfig(credentials: try credentialsProvider.getCredentials(), signedBodyValue: .streamingSha256Events, flags: .init(useDoubleURIEncode: false, shouldNormalizeURIPath: true, omitSessionToken: true), date: now, service: "transcribe", region: "us-west-2", signatureType: .requestChunk, signingAlgorithm: .sigv4)
-                    
-                    let messageSignature = try await Signer.signChunk(chunk: message.payload, previousSignature: previousMessageSignature ?? requestSignature, config: signingConfig.toCRTType())
-                    message.headers.add(.init(name: ":chunk-signature", value: messageSignature))
-                    
-                    let formatter = TimestampFormatter(format: .dateTime)
-                    message.headers.add(.init(name: ":date", value: formatter.string(from: now)))
-                    let encodedMessage = try messageEncoder.encode(message: message)
-                    
-                    previousMessageSignature = messageSignature
-                    return encodedMessage
+                guard let credentialsProvider = context.getCredentialsProvider() else {
+                   fatalError()
                 }
+                
+                    let internalStream = FooBar(stream: AsyncThrowingStream<Data, Error> { continuation in
+                    Task {
+                        if #available(macOS 13.0, *) {
+                            try await Task.sleep(for: .seconds(1))
+                        } else {
+                            // Fallback on earlier versions
+                        }
+                        var previousMessageSignature = HttpContext.signature.data(using: .utf8)!
+                        for try await event in audioStream {
+                            // convert event to Message
+                            let message = try event.marshall(encoder: encoder)
 
-                let internalStream = FooBar(stream: messages)
+                            let encodedMessage = try messageEncoder.encode(message: message)
+
+                            let now = Date()
+//                            let signingConfig = await makeTrailingSigningConfig(service: signingName,
+//                                                                          signatureType: .requestChunk,
+//                                                                          region: region,
+//                                                                          date: now,
+//                                                                          credentials: try credentialsProvider.getCredentials().toCRTType())
+//
+//                            let canonicalString = try cannonicalString(date: now, priorSignature: previousMessageSignature, nonSignatureHeaders: nonSignatureHeaders(date: now), payload: encodedMessage, region: region, service: signingName)
+//                            let signature = try await Signer.signChunk(chunk: canonicalString.data(using: .utf8)!, previousSignature: previousMessageSignature, config: signingConfig)
+//                            print("message signature: \(signature)")
+                            let signingConfig = SigningConfigV2(signingDate: now, signatureType: .requestEvent, region: region, service: signingName)
+                            let stringToSign = try signatureCalculator.chunkStringToSign(chunkBody: encodedMessage, prevSignature: previousMessageSignature, config: signingConfig)
+                            print(stringToSign)
+                            let credentials = try await credentialsProvider.getCredentials().toCRTType()
+                            
+                            let signingKey = signatureCalculator.signingKey(config: signingConfig, credentials: .init(accessKeyId: credentials.getAccessKey()!, secretAccessKey: credentials.getAccessKey()!, sessionToken: credentials.getSessionToken()))
+                            let signature =  signatureCalculator.calculate(signingKey: signingKey, stringToSign: stringToSign)
+                            var signHeaders: [EventStreams.Header] = []
+                            signHeaders.append(.init(name: ":chunk-signature", value: .byteBuffer(signature.hexaData)))
+//                            signHeaders.append(messag)
+                            
+                            signHeaders.append(.init(name: ":date", value: .timestamp(now)))
+                            let messageWithSig = EventStreams.Message(headers: signHeaders, payload: encodedMessage)
+                            
+                            let encodedMessageWithSig = try messageEncoder.encode(message: messageWithSig)
+                            continuation.yield(encodedMessageWithSig)
+                            
+                            if #available(macOS 13.0, *) {
+                                try await Task.sleep(for: .seconds(1))
+                            } else {
+                                // Fallback on earlier versions
+                            }
+                            
+                            previousMessageSignature = signature.data(using: .utf8)!
+                        }
+                        
+                        let now = Date()
+//                        let signingConfig = await makeTrailingSigningConfig(service: signingName,
+//                                                                      signatureType: .requestTrailingHeaders,
+//                                                                      region: region,
+//                                                                      date: now,
+//                                                                      credentials: try credentialsProvider.getCredentials().toCRTType())
+//
+//                        let canonicalString = try cannonicalString(date: now, priorSignature: previousMessageSignature, nonSignatureHeaders: nonSignatureHeaders(date: now), payload: .init(), region: region, service: signingName)
+//                        let signature = try await Signer.signChunk(chunk: canonicalString.data(using: .utf8)!, previousSignature: previousMessageSignature, config: signingConfig)
+//                        print("message signature: \(signature)")
+                        
+                        let signingConfig = SigningConfigV2(signingDate: now, signatureType: .requestEvent, region: region, service: signingName)
+                        let stringToSign = try signatureCalculator.chunkStringToSign(chunkBody: .init(), prevSignature: previousMessageSignature, config: signingConfig)
+                        print(stringToSign)
+                        let credentials = try await credentialsProvider.getCredentials().toCRTType()
+                        let signingKey = signatureCalculator.signingKey(config: signingConfig, credentials: .init(accessKeyId: credentials.getAccessKey()!, secretAccessKey: credentials.getAccessKey()!, sessionToken: credentials.getSessionToken()))
+                        let signature =  signatureCalculator.calculate(signingKey: signingKey, stringToSign: stringToSign)
+                        
+                        var signHeaders: [EventStreams.Header] = []
+                        
+                        let rawSign = Data(signature.hexaBytes)
+                        signHeaders.append(.init(name: ":chunk-signature", value: .byteBuffer(signature.hexaData)))
+                        
+                        signHeaders.append(.init(name: ":date", value: .timestamp(now)))
+                        let messageWithSig = EventStreams.Message(headers: signHeaders, payload: Data())
+                        
+                        let encodedMessageWithSig = try messageEncoder.encode(message: messageWithSig)
+                        continuation.yield(encodedMessageWithSig)
+                        
+                        previousMessageSignature = signature.data(using: .utf8)!
+
+                        continuation.finish()
+                    }
+                })
+
                 input.builder.withBody(HttpBody.stream(.reader(internalStream)))
             } else {
                 if encoder is JSONEncoder {
@@ -77,6 +146,34 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
     public typealias MOutput = ClientRuntime.OperationOutput<StartStreamTranscriptionOutputResponse>
     public typealias Context = ClientRuntime.HttpContext
 }
+
+func makeTrailingSigningConfig(service: String, signatureType: SignatureType, region: String, date: Date, credentials: Credentials) -> SigningConfig {
+    SigningConfig(
+        algorithm: .signingV4,
+        signatureType: signatureType,
+        service: service,
+        region: region,
+        date: date,
+        credentials: credentials,
+        useDoubleURIEncode: false)
+}
+
+
+/*
+String stringToSign =
+"AWS4-HMAC-SHA256" +
+"\n" +
+DateTime +
+"\n" +
+Keypath +
+"\n" +
+Hex(priorSignature) +
+"\n" +
+HexHash(nonSignatureHeaders) +
+"\n" +
+HexHash(payload);
+*/
+
 
 public class FooBar: IStreamable, StreamReader {
 
@@ -97,23 +194,9 @@ public class FooBar: IStreamable, StreamReader {
     }
     
     public func read(maxBytes: UInt?, rewind: Bool) async -> AwsCommonRuntimeKit.ByteBuffer {
-        var data = Data()
-        let maxBytes = maxBytes ?? UInt.max
-        var remaining = maxBytes
         var iterator = stream.makeAsyncIterator()
-        while remaining > 0 {
-            do {
-                let next = try await iterator.next()
-                if let next = next {
-                    data.append(next)
-                    remaining -= UInt(next.count)
-                } else {
-                    break
-                }
-            } catch {
-                print(error)
-                fatalError()
-            }
+        guard let data = try! await iterator.next() else {
+            return ByteBuffer(data: Data())
         }
         return ByteBuffer(data: data)
     }
@@ -130,9 +213,9 @@ public class FooBar: IStreamable, StreamReader {
         fatalError()
     }
 
-    let stream: AsyncThrowingMapSequence<AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>, Data>
+    let stream: AsyncThrowingStream<Data, Error>
     
-    init(stream: AsyncThrowingMapSequence<AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>, Data>) {
+    init(stream: AsyncThrowingStream<Data, Error>) {
         self.stream = stream
         self.availableForRead = 1
         self.hasFinishedWriting = false
@@ -150,30 +233,31 @@ public class FooBar: IStreamable, StreamReader {
     public func read(buffer: UnsafeMutableBufferPointer<UInt8>) throws -> Int? {
         let data = self.read(maxBytes: UInt(buffer.count), rewind: false).getData()
         data.copyBytes(to: buffer, count: data.count)
-        return data.count
+        print("sending: \(data)")
+        return data.count == 0 ? nil : data.count
     }
 }
 
 
 extension TranscribeStreamingClientTypes.AudioStream: MessageMarshaller {
-    public func marshall(encoder: RequestEncoder) throws -> ClientRuntime.Message {
-        var headers = Headers()
+    public func marshall(encoder: RequestEncoder) throws -> EventStreams.Message {
+        var headers: [EventStreams.Header] = []
         var payload = Data()
 
         switch self {
         case .audioevent(let data):
-            headers.add(name: ":event-type", value: "AudioEvent")
-            headers.add(name: ":content-type", value: "application/octet-stream")
+            headers.append(.init(name: ":event-type", value: .string("AudioEvent")))
+            headers.append(.init(name: ":content-type", value: .string("application/vnd.amazon.eventstream")))
             if let audioChunk = data.audioChunk {
                 payload = audioChunk
             }
         case .configurationevent(let data):
-            headers.add(name: ":event-type", value: "ConfigurationEvent")
-            headers.add(name: ":content-type", value: "application/json")
+            headers.append(.init(name: ":event-type", value: .string("ConfigurationEvent")))
+            headers.append(.init(name: ":content-type", value: .string("application/json")))
             payload = try encoder.encode(data)
         case .sdkUnknown(_):
             fatalError()
         }
-        return Message(headers: headers, payload: payload)
+        return EventStreams.Message(headers: headers, payload: payload)
     }
 }
