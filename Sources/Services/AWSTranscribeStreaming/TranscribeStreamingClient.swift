@@ -339,7 +339,7 @@ extension TranscribeStreamingClient: TranscribeStreamingClientProtocol {
         let apiMetadata = AWSClientRuntime.APIMetadata(serviceId: serviceName, version: "1.0")
         operation.buildStep.intercept(position: .before, middleware: AWSClientRuntime.UserAgentMiddleware(metadata: AWSClientRuntime.AWSUserAgentMetadata.fromEnv(apiMetadata: apiMetadata, frameworkMetadata: config.frameworkMetadata)))
         operation.serializeStep.intercept(position: .after, middleware: ClientRuntime.HeaderMiddleware<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse>())
-//        operation.serializeStep.intercept(position: .after, middleware: ContentTypeMiddleware<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse>(contentType: "application/vnd.amazon.eventstream"))
+        operation.serializeStep.intercept(position: .after, middleware: ContentTypeMiddleware<StartStreamTranscriptionInput, StartStreamTranscriptionOutputResponse>(contentType: "application/vnd.amazon.eventstream"))
         operation.serializeStep.intercept(position: .after, middleware: StartStreamTranscriptionInputBodyMiddleware())
         operation.finalizeStep.intercept(position: .before, middleware: ClientRuntime.ContentLengthMiddleware())
         operation.finalizeStep.intercept(position: .after, middleware: ClientRuntime.RetryerMiddleware<StartStreamTranscriptionOutputResponse, StartStreamTranscriptionOutputError>(retryer: config.retryer))

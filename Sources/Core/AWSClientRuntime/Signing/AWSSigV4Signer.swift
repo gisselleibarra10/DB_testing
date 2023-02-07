@@ -74,4 +74,39 @@ public class AWSSigV4Signer {
             return nil
         }
     }
+    
+    public static func signChunk(chunkBody: Data, previousSignature: Data, config: AWSSigningConfig) async throws -> Data {
+        let signatureCalculator = DefaultSignatureCalculator(sha256Provider: Sha256HashFunction())
+        
+        let stringToSign = try signatureCalculator.chunkStringToSign(chunkBody: chunkBody, prevSignature: previousSignature, config: config)
+        
+        let credentials = try await config.credentialsProvider?.getCredentials()
+        let signingKey = signatureCalculator.signingKey(config: config, credentials: credentials!)
+        
+        let signagure = signatureCalculator.calculate(signingKey: signingKey, stringToSign: stringToSign)
+        
+        return signagure.data(using: .utf8)!
+    }
+    
+    public static func signPayload(payload: Data, prevSignture: Data, config: AWSSigningConfig) async throws -> SigningResult<EventStreams.Message> {
+        let epoch = Int64(Date().timeIntervalSince1970)
+        let dt = Date(timeIntervalSince1970: TimeInterval(epoch))
+        var config = config
+        config.date = dt
+        
+        let signature = try await signChunk(chunkBody: payload, previousSignature: prevSignture, config: config)
+        let binarySignature = String(data: signature, encoding: .utf8)?.hexaData
+        
+        let message = EventStreams.Message(headers: [ .init(name: ":date", value: .timestamp(dt)),
+                                                      .init(name: ":chunk-signature", value: .byteBuffer(binarySignature!))],
+                                           payload: payload)
+        
+        return SigningResult(output: message, signature: signature)
+    }
+
+}
+
+public struct SigningResult<T> {
+    let output: T
+    let signature: Data
 }

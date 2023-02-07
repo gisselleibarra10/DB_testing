@@ -51,6 +51,13 @@ public struct SigningConfigV2 {
         self.service = service
     }
     
+    public init(config: AWSSigningConfig) {
+        self.signingDate = config.date
+        self.signatureType = config.signatureType.toCRTType()
+        self.region = config.region
+        self.service = config.service
+    }
+    
     var credentialScope: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd"
@@ -62,10 +69,10 @@ public struct SigningConfigV2 {
 
 public  protocol SignatureCalculator {
     func calculate(signingKey: Data, stringToSign: String) -> String
-    func chunkStringToSign(chunkBody: Data, prevSignature: Data, config: SigningConfigV2) throws -> String
-    func signingKey(config: SigningConfigV2, credentials: CredentialsV2) -> Data
-    func stringToSign(canonicalRequest: String, config: SigningConfigV2) throws -> String
-    func chunkTrailerStringToSign(trailingHeaders: Data, prevSignature: Data, config: SigningConfigV2) -> String
+    func chunkStringToSign(chunkBody: Data, prevSignature: Data, config: AWSSigningConfig) throws -> String
+    func signingKey(config: AWSSigningConfig, credentials: AWSCredentials) -> Data
+    func stringToSign(canonicalRequest: String, config: AWSSigningConfig) throws -> String
+    func chunkTrailerStringToSign(trailingHeaders: Data, prevSignature: Data, config: AWSSigningConfig) -> String
 }
 
 public struct DefaultSignatureCalculator: SignatureCalculator {
@@ -81,27 +88,20 @@ public struct DefaultSignatureCalculator: SignatureCalculator {
         return hash.encodeToHex()
     }
 
-    public func chunkStringToSign(chunkBody: Data, prevSignature: Data, config: SigningConfigV2) throws -> String {
+    public func chunkStringToSign(chunkBody: Data, prevSignature: Data, config: AWSSigningConfig) throws -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let date = dateFormatter.string(from: config.signingDate)
+        let date = dateFormatter.string(from: config.date)
         let nonSignatureHeadersHash: String
         switch config.signatureType {
         case .requestEvent:
-            nonSignatureHeadersHash = try eventStreamNonSingatureHeaders(date: config.signingDate)
+            nonSignatureHeadersHash = try eventStreamNonSingatureHeaders(date: config.date)
         default:
             nonSignatureHeadersHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
         let chunkBodyHash = try chunkBody.hash(hashFunction: sha256Provider).encodeToHexString()
-        return """
-        AWS4-HMAC-SHA256-PAYLOAD
-        \(date)
-        \(config.credentialScope)
-        \(String(data: prevSignature, encoding: .utf8)!)
-        \(nonSignatureHeadersHash)
-        \(chunkBodyHash)
-        """
+        return "AWS4-HMAC-SHA256-PAYLOAD\n\(date)\n\(config.credentialScope)\n\(String(data: prevSignature, encoding: .utf8)!)\n\(nonSignatureHeadersHash)\n\(chunkBodyHash)"
     }
 
     func eventStreamNonSingatureHeaders(date: Date) throws -> String{
@@ -128,16 +128,16 @@ public struct DefaultSignatureCalculator: SignatureCalculator {
             bytes[offset] = UInt8((epoch >> (i * 8)) & 0xff)
             offset += 1
         }
-        return try bytes.sha256().encodeToHexString()
+        return bytes.sha256().encodeToHexString()
     }
 
-    public func signingKey(config: SigningConfigV2, credentials: CredentialsV2) -> Data {
-        let initialKey = ("AWS4" + credentials.secretAccessKey).data(using: .utf8)!
+    public func signingKey(config: AWSSigningConfig, credentials: AWSCredentials) -> Data {
+        let initialKey = ("AWS4" + credentials.secret).data(using: .utf8)!
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let date = dateFormatter.string(from: config.signingDate)
+        let date = dateFormatter.string(from: config.date)
         let kDate = hmac(initialKey, date.data(using: .utf8)!, sha256Provider)
 
         let kRegion = hmac(kDate, config.region.data(using: .utf8)!, sha256Provider)
@@ -147,43 +147,40 @@ public struct DefaultSignatureCalculator: SignatureCalculator {
         return hmac(kService, "aws4_request".data(using: .utf8)!, sha256Provider)
     }
 
-    public func chunkTrailerStringToSign(trailingHeaders: Data, prevSignature: Data, config: SigningConfigV2) -> String {
+    public func chunkTrailerStringToSign(trailingHeaders: Data, prevSignature: Data, config: AWSSigningConfig) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let date = dateFormatter.string(from: config.signingDate)
+        let date = dateFormatter.string(from: config.date)
         let trailingHeadersHash = try! trailingHeaders.hash(hashFunction: sha256Provider).encodeToHexString()
-        return """
-        AWS4-HMAC-SHA256-TRAILER
-        \(date)
-        \(config.credentialScope)
-        \(String(data: prevSignature, encoding: .utf8)!)
-        \(trailingHeadersHash)
-        """
+        return "AWS4-HMAC-SHA256-TRAILER\n\(date)\n\(config.credentialScope)\n\(String(data: prevSignature, encoding: .utf8)!)\n\(trailingHeadersHash)"
     }
     
-    public func stringToSign(canonicalRequest: String, config: SigningConfigV2) throws -> String {
+    public func stringToSign(canonicalRequest: String, config: AWSSigningConfig) throws -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let date = dateFormatter.string(from: config.signingDate)
+        let date = dateFormatter.string(from: config.date)
         let requestHash = try canonicalRequest.data(using: .utf8)!.hash(hashFunction: sha256Provider).encodeToHexString()
-        return """
-        AWS4-HMAC-SHA256
-        \(date)
-        \(config.credentialScope)
-        \(requestHash)
-        """
+        return "AWS4-HMAC-SHA256\n\(date)\n\(config.credentialScope)\n\(requestHash)"
     }
 }
 
 extension Date {
-    public var millisecondsSince1970: Int64 {
-        Int64((self.timeIntervalSince1970 * 1000.0).rounded())
-    }
+   public var millisecondsSince1970: Int64 {
+       Int64((self.timeIntervalSince1970 * 1000.0).rounded())
+   }
 
-    public init(millisecondsSince1970: Int64) {
-        self = Date(timeIntervalSince1970: TimeInterval(millisecondsSince1970) / 1000)
+   public init(millisecondsSince1970: Int64) {
+       self = Date(timeIntervalSince1970: TimeInterval(millisecondsSince1970) / 1000)
+   }
+
+   public var nonosecondsSince1970: Int64 {
+       Int64((self.timeIntervalSince1970 * 1000000000.0).rounded())
+   }
+
+    public init(nonosecondsSince1970: Int64) {
+         self = Date(timeIntervalSince1970: TimeInterval(nonosecondsSince1970) / 1000000000)
     }
 }
 
@@ -286,9 +283,9 @@ extension Data {
         AWSClientRuntime.hash(hashFunction: hashFunction, input: self)
     }
     
-//    func bytes() -> [Int8] {
-//        return self.map { Int8(bitPattern: $0) }
-//    }
+//   public func toBytes() -> [Int8] {
+//       return self.map { Int8(bitPattern: $0) }
+//   }
 }
 
 public  struct CredentialsV2 {

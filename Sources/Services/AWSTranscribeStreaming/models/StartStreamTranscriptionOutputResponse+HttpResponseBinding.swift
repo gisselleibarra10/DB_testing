@@ -130,6 +130,9 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
                     Task {
                         while true {
                             let messageBuffer = AWSMessageDecoder.readMessage(streamReader: reader)
+                            if messageBuffer.count == 0 {
+                                continue
+                            }
                             let message = try await messageDecoder.decode(data: messageBuffer)
                             guard let decoder = decoder else {
                                 fatalError()

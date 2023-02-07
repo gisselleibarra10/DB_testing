@@ -67,31 +67,28 @@ final class EventStreams: XCTestCase {
     func testExample() async throws {
         SDKLoggingSystem.initialize(logLevel: .debug)
 
-        let audioPath = "/Users/jangirg/Projects/Amplify/SwiftSDK/aws-sdk-swift/Tests/Services/AWSTranscribeStreamingTests/Resources/hello-kotlin-8000.wav"
+        let audioPath = "/Users/jangirg/Projects/Amplify/SwiftSDK/aws-sdk-swift/Tests/Services/AWSTranscribeStreamingTests/Resources/hello_world.wav"
         let audioURL = URL(fileURLWithPath: audioPath)
         let audioData = try Data(contentsOf: audioURL)
 
-        let framesPerChunk: UInt32 = 4096
+        let chunkSize = 4096
+        let audioDataSize = audioData.count
 
         let client = try TranscribeStreamingClient(region: "us-west-2")
 
         let stream = AsyncThrowingStream<TranscribeStreamingClientTypes.AudioStream, Error> { continuation in
             Task {
-                let chunkSize = 4096
-                let audioDataSize = audioData.count
-                
                 var currentStart = 0
                 var currentEnd = min(chunkSize, audioDataSize - currentStart)
 
                 while currentStart < audioDataSize {
                     let dataChunk = audioData[currentStart ..< currentEnd]
-
+                    
+                    let audioEvent =  TranscribeStreamingClientTypes.AudioStream.audioevent(.init(audioChunk: dataChunk))
+                    continuation.yield(audioEvent)
+                    
                     currentStart = currentEnd
                     currentEnd = min(currentStart + chunkSize, audioDataSize)
-                    print(dataChunk.toString())
-                    let audioEvent =  TranscribeStreamingClientTypes.AudioStream.audioevent(.init(audioChunk: dataChunk))
-//                    print("emitting audioEvent")
-                    continuation.yield(audioEvent)
                 }
 
                 continuation.finish()
@@ -99,8 +96,8 @@ final class EventStreams: XCTestCase {
         }
         let audioStream = AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>(stream)
         let input = StartStreamTranscriptionInput(audioStream: audioStream,
-                                                  languageCode: TranscribeStreamingClientTypes.LanguageCode.enUs,
-                                                  mediaEncoding: TranscribeStreamingClientTypes.MediaEncoding.pcm,
+                                                  languageCode: .enUs,
+                                                  mediaEncoding: .pcm,
                                                   mediaSampleRateHertz: 8000)
         let output = try await client.startStreamTranscription(input: input)
         var fullMessage = ""

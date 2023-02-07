@@ -20,6 +20,14 @@ public struct AWSSigningConfig {
     public let shouldSignHeader: ((String) -> Bool)?
     public let signatureType: AWSSignatureType
     public let signingAlgorithm: AWSSigningAlgorithm
+    
+    var credentialScope: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        let date = formatter.string(from: date)
+        return "\(date)/\(region)/\(service)/aws4_request"
+    }
 
     public init(
         credentials: AWSCredentials? = nil,
