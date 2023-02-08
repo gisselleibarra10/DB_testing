@@ -80,16 +80,23 @@ public class AWSSigV4Signer {
         
         let stringToSign = try signatureCalculator.chunkStringToSign(chunkBody: chunkBody, prevSignature: previousSignature, config: config)
         
-        let credentials = try await config.credentialsProvider?.getCredentials()
-        let signingKey = signatureCalculator.signingKey(config: config, credentials: credentials!)
+        let credentials: AWSCredentials
+        if let creds = config.credentials {
+            credentials = creds
+        } else if let creds = try await config.credentialsProvider?.getCredentials() {
+            credentials = creds
+        } else {
+            fatalError()
+        }
+        let signingKey = signatureCalculator.signingKey(config: config, credentials: credentials)
         
         let signagure = signatureCalculator.calculate(signingKey: signingKey, stringToSign: stringToSign)
         
         return signagure.data(using: .utf8)!
     }
     
-    public static func signPayload(payload: Data, prevSignture: Data, config: AWSSigningConfig) async throws -> SigningResult<EventStreams.Message> {
-        let epoch = Int64(Date().timeIntervalSince1970)
+    public static func signPayload(payload: Data, prevSignture: Data, config: AWSSigningConfig, signingDate: Date) async throws -> SigningResult<EventStreams.Message> {
+        let epoch = Int64(signingDate.timeIntervalSince1970)
         let dt = Date(timeIntervalSince1970: TimeInterval(epoch))
         var config = config
         config.date = dt
@@ -107,6 +114,6 @@ public class AWSSigV4Signer {
 }
 
 public struct SigningResult<T> {
-    let output: T
-    let signature: Data
+    public let output: T
+    public let signature: Data
 }

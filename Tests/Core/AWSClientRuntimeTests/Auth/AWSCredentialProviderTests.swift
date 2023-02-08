@@ -29,3 +29,13 @@ struct MyCustomCredentialsProvider: CredentialsProvider {
         )
     }
 }
+
+struct MyCustomCredentialsProvider2: CredentialsProvider {
+    func getCredentials() async throws -> AWSCredentials {
+        return AWSCredentials(
+            accessKey: "fake access key",
+            secret: "fake secret key",
+            expirationTimeout: .init(timeIntervalSinceNow: 30)
+        )
+    }
+}

@@ -24,12 +24,12 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
             guard let region = context.getRegion(), let signingRegion = context.getSigningRegion(), let signingName = context.getSigningName() else {
                 fatalError()
             }
-            guard let messageEncoder = encoder.messageEncoder else {
-                fatalError()
-            }
+//            guard let messageEncoder = encoder.messageEncoder else {
+//                fatalError()
+//            }
 //            let messageSigner = context.getMessageSigner()
             
-            let signatureCalculator = DefaultSignatureCalculator(sha256Provider: Sha256HashFunction())
+//            let signatureCalculator = DefaultSignatureCalculator(sha256Provider: Sha256HashFunction())
 
             if let audioStream = input.operationInput.audioStream {
 //                let messages: AsyncThrowingMapSequence<AsyncRequestStream<TranscribeStreamingClientTypes.AudioStream>, Data> = audioStream.map { stream -> Data in
@@ -45,66 +45,51 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
                 
                     let internalStream = ContentStream(stream: AsyncThrowingStream<Data, Error> { continuation in
                     Task {
-//                        if #available(macOS 13.0, *) {
-//                            try await Task.sleep(for: .seconds(5))
-//                        } else {
-//                            // Fallback on earlier versions
-//                        }
-//                        var previousMessageSignature = HttpContext.signature.data(using: .utf8)!
-//                        for try await event in audioStream {
-//                            // convert event to Message
-//                            let message = try event.marshall(encoder: encoder)
-//
-//                            let encodedMessage = try messageEncoder.encode(message: message)
-//
-//                            
-//                            let epochMs = Int32(Date().timeIntervalSince1970)
-//                            let now = Date(timeIntervalSince1970: TimeInterval(epochMs))
-//                            let signingConfig = SigningConfigV2(signingDate: now, signatureType: .requestEvent, region: region, service: signingName)
-//                            let stringToSign = try signatureCalculator.chunkStringToSign(chunkBody: encodedMessage, prevSignature: previousMessageSignature, config: signingConfig)
-//                            print(stringToSign)
-//                            let credentials = try await credentialsProvider.getCredentials().toCRTType()
-//                            
-//                            let signingKey = signatureCalculator.signingKey(config: signingConfig, credentials: .init(accessKeyId: credentials.getAccessKey()!, secretAccessKey: credentials.getAccessKey()!, sessionToken: credentials.getSessionToken()))
-//                            let signature =  signatureCalculator.calculate(signingKey: signingKey, stringToSign: stringToSign)
-//                            var signHeaders: [EventStreams.Header] = []
-//                            signHeaders.append(.init(name: ":chunk-signature", value: .byteBuffer(signature.data(using: .utf8)!)))
-//                            signHeaders.append(.init(name: ":date", value: .timestamp(now)))
-//                            let messageWithSig = EventStreams.Message(headers: signHeaders, payload: encodedMessage)
-//                            
-//                            let encodedMessageWithSig = try messageEncoder.encode(message: messageWithSig)
-//                            continuation.yield(encodedMessageWithSig)
-//                            
-//                            if #available(macOS 13.0, *) {
-//                                try await Task.sleep(for: .seconds(1))
-//                            } else {
-//                                // Fallback on earlier versions
-//                            }
-//                            
-//                            previousMessageSignature = signature.data(using: .utf8)!
-//                        }
-//                        
-//                        let epochMs = Int32(Date().timeIntervalSince1970)
-//                        let now = Date(timeIntervalSince1970: TimeInterval(epochMs))
-//                        let signingConfig = SigningConfigV2(signingDate: now, signatureType: .requestEvent, region: region, service: signingName)
-//                        let stringToSign = try signatureCalculator.chunkStringToSign(chunkBody: .init(), prevSignature: previousMessageSignature, config: signingConfig)
-//                        print(stringToSign)
-//                        let credentials = try await credentialsProvider.getCredentials().toCRTType()
-//                        let signingKey = signatureCalculator.signingKey(config: signingConfig, credentials: .init(accessKeyId: credentials.getAccessKey()!, secretAccessKey: credentials.getAccessKey()!, sessionToken: credentials.getSessionToken()))
-//                        let signature =  signatureCalculator.calculate(signingKey: signingKey, stringToSign: stringToSign)
-//                        
-//                        var signHeaders: [EventStreams.Header] = []
-//                        
-//                        let rawSign = Data(signature.hexaBytes)
-//                        signHeaders.append(.init(name: ":chunk-signature", value: .byteBuffer(signature.data(using: .utf8)!)))
-//                        
-//                        signHeaders.append(.init(name: ":date", value: .timestamp(now)))
-//                        let messageWithSig = EventStreams.Message(headers: signHeaders, payload: Data())
-//                        
-//                        let encodedMessageWithSig = try messageEncoder.encode(message: messageWithSig)
-//                        continuation.yield(encodedMessageWithSig)
-//                        
-//                        previousMessageSignature = signature.data(using: .utf8)!
+                        if #available(macOS 13.0, *) {
+                            try await Task.sleep(for: .seconds(5))
+                        } else {
+                            // Fallback on earlier versions
+                        }
+                        var prevSignature = HttpContext.signature!.data(using: .utf8)!
+                        for try await event in audioStream {
+                            // convert event to Message
+                            let message = try event.marshall(encoder: encoder)
+
+                            let messagePayload = try message.encode()
+                            let epoch = Date()
+                            let signingConfig = await AWSSigningConfig(credentials: try credentialsProvider.getCredentials(),
+                                                                 signedBodyValue: .emptySha256,
+                                                                 flags: .init(useDoubleURIEncode: false, shouldNormalizeURIPath: false, omitSessionToken: false),
+                                                                 date: Date(),
+                                                                 service: signingName,
+                                                                 region: region,
+                                                                 signatureType: .requestEvent,
+                                                                 signingAlgorithm: .sigv4)
+                            
+                            let result = try! await AWSSigV4Signer.signPayload(payload: messagePayload, prevSignture: prevSignature, config: signingConfig, signingDate: epoch)
+                            
+                            let final = try result.output.encode()
+                            continuation.yield(final)
+                            
+                            prevSignature = result.signature
+                        }
+
+                        let messagePayload = Data()
+                        let epoch = Date()
+                        let signingConfig = await AWSSigningConfig(credentials: try credentialsProvider.getCredentials(),
+                                                             signedBodyValue: .emptySha256,
+                                                             flags: .init(useDoubleURIEncode: false, shouldNormalizeURIPath: false, omitSessionToken: false),
+                                                             date: Date(),
+                                                             service: signingName,
+                                                             region: region,
+                                                             signatureType: .requestEvent,
+                                                             signingAlgorithm: .sigv4)
+                        
+                        let result = try! await AWSSigV4Signer.signPayload(payload: messagePayload, prevSignture: prevSignature, config: signingConfig, signingDate: epoch)
+                        let final = try result.output.encode()
+                        continuation.yield(final)
+                        
+                        prevSignature = result.signature
 
                         continuation.finish()
                     }
@@ -139,23 +124,6 @@ func makeTrailingSigningConfig(service: String, signatureType: SignatureType, re
         credentials: credentials,
         useDoubleURIEncode: false)
 }
-
-
-/*
-String stringToSign =
-"AWS4-HMAC-SHA256" +
-"\n" +
-DateTime +
-"\n" +
-Keypath +
-"\n" +
-Hex(priorSignature) +
-"\n" +
-HexHash(nonSignatureHeaders) +
-"\n" +
-HexHash(payload);
-*/
-
 
 public class ContentStream: IStreamable, StreamReader {
     private let lock = NSLock()

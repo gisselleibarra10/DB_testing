@@ -123,26 +123,21 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
             case .buffer(_):
                 fatalError()
             case .reader(let reader):
-                guard let messageDecoder = decoder?.messageDecoder else {
-                    fatalError()
-                }
-                let stream = AsyncThrowingStream<TranscribeStreamingClientTypes.TranscriptResultStream, Error> { continuation in
+                let stream = ResponseStream(streamReader: reader)
+                let internalStream = AsyncThrowingStream<TranscribeStreamingClientTypes.TranscriptResultStream, Error> { continuation in
                     Task {
-                        while true {
-                            let messageBuffer = AWSMessageDecoder.readMessage(streamReader: reader)
-                            if messageBuffer.count == 0 {
-                                continue
+                        do {
+                            for try await message in stream {
+                                let event = try TranscribeStreamingClientTypes.TranscriptResultStream(message: message, decoder: decoder!)
+                                continuation.yield(with: Result.success(event))
                             }
-                            let message = try await messageDecoder.decode(data: messageBuffer)
-                            guard let decoder = decoder else {
-                                fatalError()
-                            }
-                            let event = try TranscribeStreamingClientTypes.TranscriptResultStream(message: message, decoder: decoder)
-                            continuation.yield(event)
+                            continuation.finish()
+                        } catch {
+                            continuation.finish(throwing: error)
                         }
                     }
                 }
-                self.transcriptResultStream = AsyncResponseStream(stream)
+                self.transcriptResultStream = AsyncResponseStream(internalStream)
             }
         case .channel(_):
             fatalError()
@@ -158,7 +153,7 @@ extension TranscribeStreamingClientTypes.TranscriptResultStream: MessageUnmarsha
         case .event(let params):
             switch params.eventType {
             case "TranscriptEvent":
-                self = try decoder.decode(responseBody: message.payload)
+                self = .transcriptevent(try .init(responseBody: message.payload, decoder: decoder))
             default:
                 fatalError()
             }
@@ -168,6 +163,12 @@ extension TranscribeStreamingClientTypes.TranscriptResultStream: MessageUnmarsha
         case .error(let params):
             throw TranscribeStreamingError(errorCode: params.errorCode, message: params.message)
         }
+    }
+}
+
+extension TranscribeStreamingClientTypes.TranscriptEvent {
+    init(responseBody: Data, decoder: ResponseDecoder) throws {
+        self = try decoder.decode(responseBody: responseBody)
     }
 }
 
