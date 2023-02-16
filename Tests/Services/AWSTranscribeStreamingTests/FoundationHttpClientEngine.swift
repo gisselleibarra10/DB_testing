@@ -59,7 +59,7 @@ struct FoundationHttpClientEngine {
             result.httpBody = stream.toBytes().getData()
         case .none:
             result.httpBody = Data()
-        case .channel(_):
+        case .asyncThrowingStream(_):
             fatalError()
         }
 

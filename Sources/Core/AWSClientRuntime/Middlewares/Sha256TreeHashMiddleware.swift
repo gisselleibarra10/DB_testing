@@ -43,9 +43,11 @@ public struct Sha256TreeHashMiddleware<OperationStackOutput: HttpResponseBinding
                       input.withHeader(name: X_AMZ_SHA256_TREE_HASH_HEADER_NAME, value: treeHash)
                       input.withHeader(name: X_AMZ_CONTENT_SHA256_HEADER_NAME, value: linearHash)
                   }
-              case .channel(_):
+              case .asyncThrowingStream(_):
                   fatalError()
-              case .empty, .none:
+              case .empty:
+                  break
+              case .none:
                   break
               }
 

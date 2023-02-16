@@ -56,12 +56,14 @@ final class EventStreams: XCTestCase {
         CommonRuntimeKit.initialize(allocator: self.allocator)
     }
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
+    override func tearDown() {
+        CommonRuntimeKit.cleanUp()
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        allocator.dump()
+        XCTAssertEqual(allocator.count, 0,
+                       "Memory was leaked: \(allocator.bytes) bytes in \(allocator.count) allocations")
+
+        super.tearDown()
     }
 
     func testExample() async throws {

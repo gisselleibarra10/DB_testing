@@ -43,19 +43,38 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
                    fatalError()
                 }
                 
-                    let internalStream = ContentStream(stream: AsyncThrowingStream<Data, Error> { continuation in
-                    Task {
-                        if #available(macOS 13.0, *) {
-                            try await Task.sleep(for: .seconds(5))
-                        } else {
-                            // Fallback on earlier versions
-                        }
-                        var prevSignature = HttpContext.signature!.data(using: .utf8)!
-                        for try await event in audioStream {
-                            // convert event to Message
-                            let message = try event.marshall(encoder: encoder)
+                    let internalStream = AsyncThrowingStream<Data, Error> { continuation in
+                        Task {
+                            if #available(macOS 13.0, *) {
+                                try await Task.sleep(for: .seconds(5))
+                            } else {
+                                // Fallback on earlier versions
+                            }
+                            var prevSignature = HttpContext.signature!.data(using: .utf8)!
+                            for try await event in audioStream {
+                                // convert event to Message
+                                let message = try event.marshall(encoder: encoder)
 
-                            let messagePayload = try message.encode()
+                                let messagePayload = try message.encode()
+                                let epoch = Date()
+                                let signingConfig = await AWSSigningConfig(credentials: try credentialsProvider.getCredentials(),
+                                                                     signedBodyValue: .emptySha256,
+                                                                     flags: .init(useDoubleURIEncode: false, shouldNormalizeURIPath: false, omitSessionToken: false),
+                                                                     date: Date(),
+                                                                     service: signingName,
+                                                                     region: region,
+                                                                     signatureType: .requestEvent,
+                                                                     signingAlgorithm: .sigv4)
+                                
+                                let result = try! await AWSSigV4Signer.signPayload(payload: messagePayload, prevSignture: prevSignature, config: signingConfig, signingDate: epoch)
+                                
+                                let final = try result.output.encode()
+                                continuation.yield(final)
+                                
+                                prevSignature = result.signature
+                            }
+
+                            let messagePayload = Data()
                             let epoch = Date()
                             let signingConfig = await AWSSigningConfig(credentials: try credentialsProvider.getCredentials(),
                                                                  signedBodyValue: .emptySha256,
@@ -67,35 +86,16 @@ public struct StartStreamTranscriptionInputBodyMiddleware: ClientRuntime.Middlew
                                                                  signingAlgorithm: .sigv4)
                             
                             let result = try! await AWSSigV4Signer.signPayload(payload: messagePayload, prevSignture: prevSignature, config: signingConfig, signingDate: epoch)
-                            
                             let final = try result.output.encode()
                             continuation.yield(final)
                             
                             prevSignature = result.signature
+
+                            continuation.finish()
                         }
-
-                        let messagePayload = Data()
-                        let epoch = Date()
-                        let signingConfig = await AWSSigningConfig(credentials: try credentialsProvider.getCredentials(),
-                                                             signedBodyValue: .emptySha256,
-                                                             flags: .init(useDoubleURIEncode: false, shouldNormalizeURIPath: false, omitSessionToken: false),
-                                                             date: Date(),
-                                                             service: signingName,
-                                                             region: region,
-                                                             signatureType: .requestEvent,
-                                                             signingAlgorithm: .sigv4)
-                        
-                        let result = try! await AWSSigV4Signer.signPayload(payload: messagePayload, prevSignture: prevSignature, config: signingConfig, signingDate: epoch)
-                        let final = try result.output.encode()
-                        continuation.yield(final)
-                        
-                        prevSignature = result.signature
-
-                        continuation.finish()
                     }
-                })
 
-                input.builder.withBody(HttpBody.stream(.reader(internalStream)))
+                input.builder.withBody(HttpBody.asyncThrowingStream(internalStream))
             } else {
                 if encoder is JSONEncoder {
                     // Encode an empty body as an empty structure in JSON

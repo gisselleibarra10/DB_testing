@@ -139,7 +139,7 @@ extension StartStreamTranscriptionOutputResponse: ClientRuntime.HttpResponseBind
                 }
                 self.transcriptResultStream = AsyncResponseStream(internalStream)
             }
-        case .channel(_):
+        case .asyncThrowingStream(_):
             fatalError()
         case .none:
             fatalError()
@@ -158,8 +158,20 @@ extension TranscribeStreamingClientTypes.TranscriptResultStream: MessageUnmarsha
                 fatalError()
             }
         case .exception(let params):
-            fatalError()
-            break
+            switch params.exceptionType {
+            case "BadRequestException":
+                self = .badrequestexception(try .init(responseBody: message.payload, decoder: decoder))
+            case "LimitExceededException":
+                self = .limitexceededexception(try .init(responseBody: message.payload, decoder: decoder))
+            case "InternalFailureException":
+                self = .internalfailureexception(try .init(responseBody: message.payload, decoder: decoder))
+            case "ConflictException":
+                self = .conflictexception(try .init(responseBody: message.payload, decoder: decoder))
+            case "ServiceUnavailableException":
+                self = .serviceunavailableexception(try .init(responseBody: message.payload, decoder: decoder))
+            default:
+                throw TranscribeStreamingError(errorCode: params.exceptionType, message: nil)
+            }
         case .error(let params):
             throw TranscribeStreamingError(errorCode: params.errorCode, message: params.message)
         }
@@ -167,6 +179,36 @@ extension TranscribeStreamingClientTypes.TranscriptResultStream: MessageUnmarsha
 }
 
 extension TranscribeStreamingClientTypes.TranscriptEvent {
+    init(responseBody: Data, decoder: ResponseDecoder) throws {
+        self = try decoder.decode(responseBody: responseBody)
+    }
+}
+
+extension BadRequestException {
+    init(responseBody: Data, decoder: ResponseDecoder) throws {
+        self = try decoder.decode(responseBody: responseBody)
+    }
+}
+
+extension InternalFailureException {
+    init(responseBody: Data, decoder: ResponseDecoder) throws {
+        self = try decoder.decode(responseBody: responseBody)
+    }
+}
+
+extension LimitExceededException {
+    init(responseBody: Data, decoder: ResponseDecoder) throws {
+        self = try decoder.decode(responseBody: responseBody)
+    }
+}
+
+extension ConflictException {
+    init(responseBody: Data, decoder: ResponseDecoder) throws {
+        self = try decoder.decode(responseBody: responseBody)
+    }
+}
+
+extension ServiceUnavailableException {
     init(responseBody: Data, decoder: ResponseDecoder) throws {
         self = try decoder.decode(responseBody: responseBody)
     }
