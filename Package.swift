@@ -372,6 +372,9 @@ let package = Package(
     targets: [
         // MARK: - Core Targets
         .target(name: "AWSClientRuntime", dependencies: [awsCommonRuntimeKit, clientRuntime], path: "./Sources/Core/AWSClientRuntime"),
+        
+         
+        .target(name: "<your target name>",dependencies: [.product(name: "AWSDynamoDB",package: "AWSSwiftSDK")]),
 
         // MARK: - Core Test Targets
         .testTarget(name: "AWSClientRuntimeTests", dependencies: [clientRuntime, "AWSClientRuntime", smithyTestUtil], path: "./Tests/Core/AWSClientRuntimeTests"),
